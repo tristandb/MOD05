@@ -29,6 +29,7 @@ public class App extends Application {
 			controller.setStage(primaryStage);
 			controller.setBoard(board);
 
+			controller.startGame();
 			Scene scene = new Scene(layout);
 
 			primaryStage.setMinWidth(800);
