@@ -12,7 +12,7 @@ with picamera.PiCamera() as camera:
                 camera = 2
             else:
                 camera = 0
-        else
+        else:
             camera = 0
 
         # Set camera color
@@ -22,7 +22,7 @@ with picamera.PiCamera() as camera:
         camera.capture(variable, 'rgb')
 
         print "%s" % variable
-        
+
 
 def setCameraPreferences:
     camera.sharpness = 0
