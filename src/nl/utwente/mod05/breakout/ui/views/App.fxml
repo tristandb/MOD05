@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #000;"
+            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="nl.utwente.mod05.breakout.ui.AppGUIController">
+   <center>
+      <Canvas fx:id="boardCanvas" height="450.0" width="600.0" BorderPane.alignment="CENTER_LEFT" />
+   </center>
+   <right>
+      <VBox prefHeight="600.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <Canvas fx:id="cameraCanvas" height="200.0" width="200.0" />
+            <TableView fx:id="scores" prefHeight="400.0" prefWidth="200.0" style="-fx-background-color: #000;">
+              <columns>
+                <TableColumn prefWidth="121.0" text="C1" />
+                <TableColumn prefWidth="78.0" text="C2" />
+              </columns>
+            </TableView>
+         </children>
+      </VBox>
+   </right>
+</BorderPane>
