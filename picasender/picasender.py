@@ -6,6 +6,7 @@ import sys
 from math import *
 
 # Define ports and clockspeed
+# TODO: Set correct pins
 CLOCK_INPUT = 1
 CLOCK_OUTPUT = 2
 NEW_IMAGE_INPUT = 3
@@ -75,6 +76,7 @@ with picamera.PiCamera() as camera:
 	while True:
 		# If the FPGA demands a new picture, take a new picture.
 		if newImage != GPIO.input(NEW_IMAGE_INPUT):	
+			newImage = (newImage + 1) % 2
 			camera.capture(cw, 'rgb')
 		time.sleep(1.0/(float(CLOCK_SPEED)/2))
 
