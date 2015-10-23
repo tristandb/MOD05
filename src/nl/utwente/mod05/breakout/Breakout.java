@@ -10,8 +10,13 @@ import nl.utwente.mod05.breakout.model.Board;
 import nl.utwente.mod05.breakout.ui.AppGUIController;
 
 import java.io.IOException;
+import java.util.Map;
 
-public class App extends Application {
+/**
+ * TODO: Documentation...
+ */
+public class Breakout extends Application {
+	public static final boolean DEBUG = true;
 
 	public static void main(String[] args) {
 		launch(args);
@@ -19,10 +24,27 @@ public class App extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
+		Map<String, String> params = this.getParameters().getNamed();
+		int width = 600;
+		int height = 480;
+		if (params.containsKey("width") && params.containsKey("height")) {
+			try {
+				width = Integer.parseInt(params.get("width"));
+				height = Integer.parseInt(params.get("height"));
+			} catch (NumberFormatException e) {
+				width = -1;
+				height = -1;
+			}
+		}
+		if (width < 600 || height < 480) {
+			width = 600;
+			height = 480;
+		}
+
 		FXMLLoader loader = new FXMLLoader();
-		loader.setLocation(AppGUIController.class.getResource("views/App.fxml"));
+		loader.setLocation(AppGUIController.class.getResource("views/GUI.fxml"));
 		BorderPane layout;
-		Board board = new Board();
+		Board board = new Board(width, height);
 		try {
 			layout = loader.load();
 			AppGUIController controller = loader.getController();
