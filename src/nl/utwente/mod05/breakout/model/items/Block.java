@@ -5,7 +5,7 @@ package nl.utwente.mod05.breakout.model.items;
  */
 public class Block extends Item {
 	public static final int DEFAULT_HEIGHT = 30;
-	public static final String[] DEFAULT_COLORS = {"#0032FF", "#00FF32", "#FF7700", "#FF3200"};
+	public static final String[] DEFAULT_COLORS = {"#F0FF00", "#00FF32", "#FF7700", "#FF3200"};
 
 	private int row;
 
@@ -18,7 +18,7 @@ public class Block extends Item {
 	 * @param color The color of the block in web format.
 	 * @param row The row identifier.
 	 */
-	public Block(int posx, int posy, int width, int height, String color, int
+	public Block(double posx, double posy, double width, double height, String color, int
 			row) {
 		super(posx, posy, width, height, Shape.RECTANGLE, color);
 		this.row = row;
@@ -30,13 +30,5 @@ public class Block extends Item {
 	 */
 	public int getRow() {
 		return this.row;
-	}
-
-	/**
-	 * Sets the row identifier of the Block.
-	 * @param row An int representing the row identifier.
-	 */
-	public void setRow(int row) {
-		this.row = row;
 	}
 }
