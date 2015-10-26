@@ -1,6 +1,7 @@
 package nl.utwente.mod05.breakout.model;
 
 import nl.utwente.mod05.breakout.Breakout;
+import nl.utwente.mod05.breakout.input.InputHandler;
 import nl.utwente.mod05.breakout.model.items.*;
 
 import java.util.Collections;
@@ -17,6 +18,7 @@ public class Board {
 	public static final int BLOCKS_PER_ROW = 15;
 	public static final int BLOCK_ROWS = 4;
 	private boolean running;
+	private boolean paused;
 	private boolean lastRowHit;
 	private boolean secondToLastRowHit;
 
@@ -89,6 +91,7 @@ public class Board {
 		this.secondToLastRowHit = false;
 		this.lastRowHit = false;
 		this.running = false;
+		this.paused = false;
 		this.score = 0;
 	}
 
@@ -97,8 +100,28 @@ public class Board {
 	 */
 	public void start() {
 		this.running = true;
+		if (this.paused) {
+			this.paused = false;
+		}
 	}
 
+	public void unpause() {
+		this.paused = false;
+	}
+	/**
+	 * Pauses the game.
+	 */
+	public void pause() {
+		this.paused = true;
+	}
+
+	/**
+	 * Returns whether the game is paused.
+	 * @return true if the game is running, but paused. False if otherwise.
+	 */
+	public boolean isPaused() {
+		return this.running && this.paused;
+	}
 	/**
 	 * Determines whether the game is running or not.
 	 * @return The game status.
@@ -148,7 +171,7 @@ public class Board {
 	 * @param paddlePosition The position to set the paddle to.
 	 */
 	public synchronized void setPaddlePosition(int paddlePosition) {
-		if (this.running) {
+		if (this.running && paddlePosition != InputHandler.ERROR_STATE) {
 			paddlePosition = paddlePosition - (int) (this.paddle.getWidth() / 2);
 
 			if (paddlePosition < 0) {
@@ -164,7 +187,7 @@ public class Board {
 	 * Calculates the positions of all items for the next frame of the board.
 	 */
 	public synchronized void next() {
-		if (this.running) {
+		if (this.running && !this.paused) {
 			double speed = this.ball.getVelocity();
 			double heading = this.ball.getHeading();
 			double newX, newY;
@@ -192,6 +215,11 @@ public class Board {
 				this.running = false;
 				return;
 			}
+
+			//Make sure the new coordinates are actually on the game field.
+			newX = newX < 0 ? 1 : newX > this.width ? this.width - 2 * this.ball.getRadius() : newX;
+			newY = newY < 0 ? 1 : newY > this.height ? this.height - 2 * this.ball.getRadius() :
+					newY;
 
 			//Check if the ball hit any blocks.
 			Iterator<Block> blocks = this.blocks.iterator();
@@ -229,12 +257,42 @@ public class Board {
 					//Only do 1 hit per frame.
 					break;
 				}
+				/*Ball.Tuple<Ball.Edge, Ball.Point> hitPoint= this.ball.intersect(b,
+						newX + this.ball.getRadius(), newY + this.ball.getRadius());
+				if (hitPoint.first != Ball.Edge.NONE) {
+					if (Breakout.DEBUG) {
+						System.out.println(hitPoint.first);
+					}
+					//If blocks on the highest row are hit the first time, increase speed and
+					// reduce the paddle size
+					if (b.getRow() == BLOCK_ROWS && !this.lastRowHit) {
+						this.lastRowHit = true;
+						this.ball.setVelocity(speed * Ball.SPEED_MULTIPLIER);
+						this.paddle.setWidth(this.paddle.getWidth() / 2);
+					}
+					//If blocks on the second to highest row are hit the first time, increase speed
+					if (b.getRow() == BLOCK_ROWS - 1 && !this.secondToLastRowHit) {
+						this.secondToLastRowHit = true;
+						this.ball.setVelocity(speed * Ball.SPEED_MULTIPLIER);
+					}
+
+					//Calculate new ball heading
+					if (hitPoint.first.equals(Ball.Edge.TOP)
+							|| hitPoint.first.equals(Ball.Edge.BOTTOM)) {
+						heading = 360 - this.ball.getHeading();
+					} else {
+						heading = 180 - this.ball.getHeading();
+					}
+					newX = hitPoint.second.x - this.ball.getRadius();
+					newY = hitPoint.second.y - this.ball.getRadius();
+					//Remove block from the list.
+					blocks.remove();
+
+					//Only do 1 hit per frame.
+					break;
+				}*/
 			}
 
-			//Make sure the new coordinates are actually on the game field.
-			newX = newX < 0 ? 1 : newX > this.width ? this.width - 2 * this.ball.getRadius() : newX;
-			newY = newY < 0 ? 1 : newY > this.height ? this.height - 2 * this.ball.getRadius() :
-					newY;
 			this.ball.setPosition(newX, newY);
 			this.ball.setHeading(heading % 360);
 		}

@@ -7,7 +7,7 @@
 
 <BorderPane fx:id="borderPane" maxHeight="1.7976931348623157E308"
             maxWidth="1.7976931348623157E308" minHeight="600" minWidth="800"
-            style="-fx-background-color: #000;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nl.utwente.mod05.breakout.ui.AppGUIController">
+            style="-fx-background-color: #000;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nl.utwente.mod05.breakout.ui.GUIController">
    <right>
       <VBox prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>

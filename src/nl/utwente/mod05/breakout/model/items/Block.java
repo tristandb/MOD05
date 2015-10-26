@@ -4,7 +4,7 @@ package nl.utwente.mod05.breakout.model.items;
  * Class representing a block in a breakout game.
  */
 public class Block extends Item {
-	public static final int DEFAULT_HEIGHT = 30;
+	public static final int DEFAULT_HEIGHT = 35;
 	public static final String[] DEFAULT_COLORS = {"#F0FF00", "#00FF32", "#FF7700", "#FF3200"};
 
 	private int row;
