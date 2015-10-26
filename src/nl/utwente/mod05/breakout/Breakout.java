@@ -78,7 +78,12 @@ public class Breakout extends Application {
 						}
 					}
 			);
-			primaryStage.setFullScreen(true);
+			if (getBoolFromParam(params, "fullscreen", false)) {
+				primaryStage.setFullScreen(true);
+			} else {
+				primaryStage.setMinWidth(width+200);
+				primaryStage.setMinHeight(height);
+			}
 			primaryStage.setTitle("Augmented Breakout");
 			primaryStage.setScene(scene);
 			primaryStage.show();

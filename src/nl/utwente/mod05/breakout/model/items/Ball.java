@@ -85,8 +85,8 @@ public class Ball extends Item {
 	 * @param item The item to check.
 	 * @return The edge of collision, either none, top, left, right or bottom.
 	 */
-	public synchronized Edge intersects(Item item) {
-		return this.hasTangentOrIntersection(item);
+	public synchronized Tuple<Edge, Point> intersects(Item item) {
+		return this.hasTangentOrIntersection2(item);
 	}
 
 	/**
@@ -124,6 +124,49 @@ public class Ball extends Item {
 		}
 		return Edge.NONE;
 	}
+	/**
+	 * Determine whether the item has one or multiple intersections
+	 * @param item The item to check.
+	 * @return The edge of collision.
+	 */
+	private synchronized Tuple<Edge, Point> hasTangentOrIntersection2(Item item) {
+		double relativeX, relativeY, w, h;
+		relativeX = (this.posx + this.radius) - item.getX();
+		relativeY = (this.posy + this.radius) - item.getY();
+		w = item.getWidth();
+		h = item.getHeight();
+
+		Point a = new Point(relativeX, relativeY + h);
+		Point b = new Point(relativeX + w, relativeY + h);
+		Point c = new Point(relativeX + w, relativeY);
+		Point d = new Point(relativeX, relativeY);
+		Point invalid = new Point(Point.INVALID_X, Point.INVALID_Y);
+
+		//Create a small bounding box since calculateDiscriminant uses infinite lines instead of
+		// the finite we have.
+		if (item.getX() < this.posx + (this.radius) &&
+				(item.getX() + item.getWidth()) > this.posx &&
+				item.getY() < this.posy + (this.radius) &&
+				item.getY() + item.getHeight() > this.posy) {
+			Point intersect = calculateIntersection(a, b);
+			if (!intersect.equals(invalid)) {
+				return new Tuple<>(Edge.BOTTOM, intersect);
+			}
+			intersect = calculateIntersection(b, c);
+			if (!intersect.equals(invalid)) {
+				return new Tuple<>(Edge.BOTTOM, intersect);
+			}
+			intersect = calculateIntersection(c, d);
+			if (!intersect.equals(invalid)) {
+				return new Tuple<>(Edge.BOTTOM, intersect);
+			}
+			intersect = calculateIntersection(d, a);
+			if (!intersect.equals(invalid)) {
+				return new Tuple<>(Edge.BOTTOM, intersect);
+			}
+		}
+		return new Tuple<>(Edge.NONE, invalid);
+	}
 
 	/**
 	 * Calculates the discriminant between the ball and a line. Returns < 0 for no intersection,
@@ -140,6 +183,33 @@ public class Ball extends Item {
 		dr = Math.sqrt(dx * dx + dy * dy);
 		D = p1.x * p2.y - p2.x * p1.y;
 		return (this.radius * this.radius) * (dr * dr) - (D * D);
+	}
+
+	private Point calculateIntersection(Point p1, Point p2) {
+		double dx, dy, dr, D, resX, resY;
+
+		dx = p2.x - p1.x;
+		dy = p2.y - p1.y;
+		dr = Math.sqrt(dx * dx + dy * dy);
+		D = p1.x * p2.y - p2.x * p1.y;
+
+		if (dr != 0) {
+			resX = (D * dy + sign(dy) * dx *
+					Math.sqrt((this.radius * this.radius) * (dr * dr) - (D * D))) / (dr * dr);
+			resY = (-D * dx + Math.abs(dy) *
+					Math.sqrt((this.radius * this.radius) * (dr * dr) - (D * D))) / (dr * dr);
+
+			/*if (resX >= Math.min(p1.x, p2.x) && resX <= Math.max(p1.x, p2.x)
+					&& resY >= Math.min(p1.y, p2.y) && resY <= Math.max(p1.y, p2.y)) {
+				return new Point(resX, resY);
+			}*/
+			return new Point(resX, resY);
+		}
+		return new Point(Point.INVALID_X, Point.INVALID_Y);
+	}
+
+	private double sign(double x) {
+		return x < 0 ? -1 : x;
 	}
 
 	public Tuple<Ball.Edge, Ball.Point> intersect(Item item, double nx, double ny) {

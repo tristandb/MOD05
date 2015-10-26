@@ -7,6 +7,7 @@ public class Block extends Item {
 	public static final int DEFAULT_HEIGHT = 35;
 	public static final String[] DEFAULT_COLORS = {"#F0FF00", "#00FF32", "#FF7700", "#FF3200"};
 
+	public int id;
 	private int row;
 
 	/**
@@ -19,8 +20,9 @@ public class Block extends Item {
 	 * @param row The row identifier.
 	 */
 	public Block(double posx, double posy, double width, double height, String color, int
-			row) {
+			row, int id) {
 		super(posx, posy, width, height, Shape.RECTANGLE, color);
+		this.id = id;
 		this.row = row;
 	}
 

@@ -55,12 +55,13 @@ public class GUIController {
 		//Animation timer, should run about 60 times a second.
 		new AnimationTimer() {
 			long oldTime = System.nanoTime();
-			public void handle(long currentTime) {
+			public synchronized void handle(long currentTime) {
 				//Clear the canvas for a new frame.
 				gc.clearRect(0, 0, board.getWidth(), board.getHeight());
 				//Calculate new frame values.
 				board.next();
 				//Retrieve input from InputHandler and set the paddle position accordingly.
+
 				int input = inputHandler.getInput();
 				if (input == InputHandler.ERROR_STATE) {
 					board.pause();
@@ -94,7 +95,7 @@ public class GUIController {
 					gc.fillRect(0, 0, board.getWidth(), board.getHeight());
 				}
 
-					//On DEBUG, show FPS counter in the upper left corner.
+				//On DEBUG, show FPS counter in the upper left corner.
 				if (Breakout.DEBUG) {
 					showDebug(gc, currentTime, oldTime);
 				}
