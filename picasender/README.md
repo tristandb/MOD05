@@ -10,14 +10,14 @@ You'll also need RPi.GPIO. For further instructions, please read https://pypi.py
 # Ports
 Data bit | Data pin | Altera pin
 ---------|----------|-----------
-7 	 | 4	    | 
-6 	 | 13	    |	
-5 	 | 15	    |	
-4 	 | 16       |
-3 	 | 18	    |
-2 	 | 22	    |		
-1 	 | 31	    |
-0 	 | 32	    |	
+7 	 | 13	    | 
+6 	 | 15	    |	
+5 	 | 16	    |	
+4 	 | 18     |
+3 	 | 22	    |
+2 	 | 31	    |		
+1 	 | 32	    |
+0 	 | 38	    |	
 
 Other pins          | Pin | Altera pin
 --------------------|-----|------------
