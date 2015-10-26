@@ -21,8 +21,8 @@ Data bit | Data pin | Altera pin
 
 Other pins          | Pin | Altera pin
 --------------------|-----|------------
-Request a new image | 33  |
-Request next data   | 35  |
-Output new data	    | 36  |
+Request a new image | 33  | frame
+Request next data   | 35  | received
+Output new data	    | 36  | receive
 Serial location     | 37  | 
 
