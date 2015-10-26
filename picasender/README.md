@@ -10,18 +10,19 @@ You'll also need RPi.GPIO. For further instructions, please read https://pypi.py
 # Ports
 Data bit | Data pin | Altera pin
 ---------|----------|-----------
-7 	 | 07	    | 
-6 	 | 11	    |	
-5 	 | 12	    |	
-4 	 | 13       |
-3 	 | 15	    |
-2 	 | 16	    |		
-1 	 | 18	    |
-0 	 | 22	    |	
+7 	 | 4	    | 
+6 	 | 13	    |	
+5 	 | 15	    |	
+4 	 | 16       |
+3 	 | 18	    |
+2 	 | 22	    |		
+1 	 | 31	    |
+0 	 | 32	    |	
 
 Other pins          | Pin | Altera pin
 --------------------|-----|------------
-Request a new image | 29  |
-Request next data   | 31  |
-Output new data	    | 32  |
+Request a new image | 33  |
+Request next data   | 35  |
+Output new data	    | 36  |
+Serial location     | 37  | 
 
