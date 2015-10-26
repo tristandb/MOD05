@@ -11,6 +11,7 @@ CLOCK_INPUT = 40
 CLOCK_OUTPUT = 22
 NEW_IMAGE_INPUT = 18
 CLOCK_SPEED = 50.0 * 1000.0
+# First output = GPIO_PIN_ARRAY[0]
 GPIO_FIRST_OUTPUT = 29
 # 8 pins to send the data over
 GPIO_PIN_ARRAY = [29, 31, 32, 33, 35, 36, 37, 38]

@@ -8,20 +8,20 @@ You'll also need RPi.GPIO. For further instructions, please read https://pypi.py
 # Running
 
 # Ports
-Data bit | Data pin
----------|---------
-7 	 | 29
-6 	 | 31
-5 	 | 32
-4 	 | 33
-3 	 | 35
-2 	 | 36
-1 	 | 37	
-0 	 | 38
+Data bit | Data pin | Altera pin
+---------|----------|-----------
+7 	 | 07	    | 
+6 	 | 11	    |	
+5 	 | 12	    |	
+4 	 | 13       |
+3 	 | 15	    |
+2 	 | 16	    |		
+1 	 | 18	    |
+0 	 | 22	    |	
 
-Other pins          | Pin
---------------------|-----
-Request a new image | 18
-Request next data   | 40
-Output new data	    | 22
+Other pins          | Pin | Altera pin
+--------------------|-----|------------
+Request a new image | 29  |
+Request next data   | 31  |
+Output new data	    | 32  |
 
