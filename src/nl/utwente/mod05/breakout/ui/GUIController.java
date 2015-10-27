@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Controller class for the GUI. This class handles all user input and output.
  */
-public class AppGUIController {
+public class GUIController {
 	@FXML
 	private BorderPane borderPane;
 	@FXML
@@ -55,22 +55,29 @@ public class AppGUIController {
 		//Animation timer, should run about 60 times a second.
 		new AnimationTimer() {
 			long oldTime = System.nanoTime();
-			public void handle(long currentTime) {
+			public synchronized void handle(long currentTime) {
 				//Clear the canvas for a new frame.
 				gc.clearRect(0, 0, board.getWidth(), board.getHeight());
 				//Calculate new frame values.
 				board.next();
-				if (!board.isRunning()) {
+				//Retrieve input from InputHandler and set the paddle position accordingly.
+
+				int input = inputHandler.getInput();
+				if (input == InputHandler.ERROR_STATE) {
+					board.pause();
+				} else if (board.isPaused()){
+					board.unpause();
+				}
+
+				if (!board.isRunning() && !board.isPaused()) {
 					if (Breakout.DEBUG) {
 						System.out.println("Score: " + board.getScore());
 					}
-
 					//Stop the AnimationTimer.
 					this.stop();
 				}
 
-				//Retrieve input from InputHandler and set the paddle position accordingly.
-				board.setPaddlePosition(inputHandler.getInput());
+				board.setPaddlePosition(input);
 
 				//Draw all items on the canvas. This will draw the whole game layout.
 				List<Item> items = board.getItems();
@@ -81,6 +88,11 @@ public class AppGUIController {
 					} else {
 						gc.fillRect(item.getX(), item.getY(), item.getWidth(), item.getHeight());
 					}
+				}
+
+				if (board.isPaused()) {
+					gc.setFill(new Color(0, 0, 0, 0.5));
+					gc.fillRect(0, 0, board.getWidth(), board.getHeight());
 				}
 
 				//On DEBUG, show FPS counter in the upper left corner.

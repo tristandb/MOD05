@@ -10,7 +10,7 @@ import nl.utwente.mod05.breakout.input.CameraInputHandler;
 import nl.utwente.mod05.breakout.input.InputHandler;
 import nl.utwente.mod05.breakout.input.MouseInputHandler;
 import nl.utwente.mod05.breakout.model.Board;
-import nl.utwente.mod05.breakout.ui.AppGUIController;
+import nl.utwente.mod05.breakout.ui.GUIController;
 
 import java.io.IOException;
 import java.util.Map;
@@ -46,7 +46,7 @@ public class Breakout extends Application {
 
 		//Loads the correct FXML file.
 		FXMLLoader loader = new FXMLLoader();
-		loader.setLocation(AppGUIController.class.getResource("views/GUI.fxml"));
+		loader.setLocation(GUIController.class.getResource("views/GUI.fxml"));
 		BorderPane layout = null;
 
 		try {
@@ -66,7 +66,7 @@ public class Breakout extends Application {
 				input = new MouseInputHandler(width, scene);
 			}
 
-			AppGUIController controller = loader.getController();
+			GUIController controller = loader.getController();
 			controller.setBoard(board);
 			controller.setInputHandler(input);
 			controller.createGUI();
@@ -78,10 +78,12 @@ public class Breakout extends Application {
 						}
 					}
 			);
-			//controller.startGame();
-
-			primaryStage.setMinWidth(width + 200);
-			primaryStage.setMinHeight(height);
+			if (getBoolFromParam(params, "fullscreen", false)) {
+				primaryStage.setFullScreen(true);
+			} else {
+				primaryStage.setMinWidth(width+200);
+				primaryStage.setMinHeight(height);
+			}
 			primaryStage.setTitle("Augmented Breakout");
 			primaryStage.setScene(scene);
 			primaryStage.show();
