@@ -1,9 +1,12 @@
 package nl.utwente.mod05.breakout.model.items;
 
+import javafx.scene.paint.Color;
+import nl.utwente.mod05.breakout.Breakout;
+import nl.utwente.mod05.breakout.ui.GUIController;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 /**
  * Class representing a ball
@@ -76,196 +79,171 @@ public class Ball extends Item {
 	 * @param heading the heading of the ball.
 	 */
 	public synchronized void setHeading(double heading) {
-		this.heading = heading;
+		if (heading < 0) {
+			heading = heading % -360;
+			heading = 360 + heading;
+		}
+		this.heading = (heading % 360);
 	}
 
 	/**
 	 * Determines whether the ball has hit an Item, returns the edge of collision.
 	 * TODO: new implementation using simple line intersections. Possible better results.
-	 * @param item The item to check.
+	 * @param block The item to check.
 	 * @return The edge of collision, either none, top, left, right or bottom.
 	 */
-	public synchronized Tuple<Edge, Point> intersects(Item item) {
-		return this.hasTangentOrIntersection2(item);
+	public synchronized Tuple<Edge, Point> intersects(double newX, double newY, Block block) {
+		return this.getIntersection(newX, newY, block);
 	}
 
 	/**
 	 * Determine whether the item has one or multiple intersections
-	 * @param item The item to check.
+	 * @param block The item to check.
 	 * @return The edge of collision.
 	 */
-	private synchronized Edge hasTangentOrIntersection(Item item) {
-		double relativeX, relativeY, w, h;
-		relativeX = (this.posx + this.radius) - item.getX();
-		relativeY = (this.posy + this.radius) - item.getY();
-		w = item.getWidth();
-		h = item.getHeight();
+	private synchronized Tuple<Edge, Point> getIntersection(double newX, double newY,
+															Block block) {
+		double relativeX, relativeY, w, h, tx, ty, dx, dy, linelength;
+		dx = this.posx - newX;
+		dy = this.posy - newY;
+		linelength = Math.sqrt(Math.abs(dx * dx) + Math.abs(dy * dy));
 
-		Point a = new Point(relativeX, relativeY + h);
-		Point b = new Point(relativeX + w, relativeY + h);
-		Point c = new Point(relativeX + w, relativeY);
-		Point d = new Point(relativeX, relativeY);
+		if (!(this.ballGoesUp() && this.ballGoesLeft() && block.hasBottom() && block.hasRight())
+				&& !(this.ballGoesUp() && this.ballGoesRight() && block.hasBottom() && block.hasLeft())
+				&& !(this.ballGoesDown() && this.ballGoesLeft() && block.hasTop() && block.hasRight())
+				&& !(this.ballGoesDown() && this.ballGoesRight() && block.hasTop() && block.hasLeft())
+				) {
+			for (int i = 0; i < (int) (linelength * 10); i += Math.max((int) (linelength / 10), 1)) {
+				HashMap<Edge, Point> intersections = new HashMap<>();
+				tx = Math.max(0, this.posx + i * (dx / 10));
+				ty = Math.max(0, this.posy + i * (dy / 10));
+				relativeX = (tx + this.radius) - block.getX();
+				relativeY = block.getY() - (ty + this.radius);
+				w = block.getWidth();
+				h = block.getHeight();
 
-		//Create a small bounding box since calculateDiscriminant uses infinite lines instead of
-		// the finite we have.
-		if (item.getX() < this.posx + (this.radius) &&
-				(item.getX() + item.getWidth()) > this.posx &&
-				item.getY() < this.posy + (this.radius) &&
-				item.getY() + item.getHeight() > this.posy) {
-			if (calculateDiscriminant(a, b) >= 0) {
-				return Edge.BOTTOM;
-			} else if (calculateDiscriminant(b, c) > 0) {
-				return Edge.RIGHT;
-			} else if (calculateDiscriminant(c, d) > 0) {
-				return Edge.TOP;
-			} else if (calculateDiscriminant(d, a) > 0) {
-				return Edge.LEFT;
+				Point a = new Point(relativeX, relativeY + h);
+				Point b = new Point(relativeX + w, relativeY + h);
+				Point c = new Point(relativeX + w, relativeY);
+				Point d = new Point(relativeX, relativeY);
+				Point invalid = new Point(Point.INVALID_X, Point.INVALID_Y);
+
+				//Create a small bounding box since calculateDiscriminant uses infinite lines instead of
+				// the finite we have.
+				if (block.getX() < tx + (2 * this.radius) &&
+						(block.getX() + block.getWidth()) > tx &&
+						block.getY() < ty + (2 * this.radius) &&
+						block.getY() + block.getHeight() > ty) {
+
+					if (Breakout.DEBUG) {
+						GUIController.context.setStroke(Color.RED);
+						GUIController.context.strokeOval(tx - this.radius, ty - this.radius,
+								this.radius * 2, this.radius * 2);
+					}
+
+					Point intersect = calculateIntersection(a, b, tx, ty);
+					if (this.ballGoesUp() && !intersect.equals(invalid)) {
+						//return new Tuple<>(Edge.BOTTOM, intersect);
+						intersections.put(Edge.BOTTOM, intersect);
+					}
+					intersect = calculateIntersection(b, c, tx, ty);
+					if (this.ballGoesLeft() && !intersect.equals(invalid)) {
+						//return new Tuple<>(Edge.RIGHT, intersect);
+						intersections.put(Edge.RIGHT, intersect);
+					}
+					intersect = calculateIntersection(c, d, tx, ty);
+					if (this.ballGoesDown() && !intersect.equals(invalid)) {
+						//return new Tuple<>(Edge.TOP, intersect);
+						intersections.put(Edge.TOP, intersect);
+					}
+					intersect = calculateIntersection(d, a, tx, ty);
+					if (this.ballGoesRight() && !intersect.equals(invalid)) {
+						//return new Tuple<>(Edge.LEFT, intersect);
+						intersections.put(Edge.LEFT, intersect);
+					}
+
+					if (intersections.size() >= 1) {
+						//TODO: Do something with multiple intersections.
+						if (intersections.containsKey(Edge.BOTTOM)) {
+							Point t1 = intersections.get(Edge.BOTTOM);
+							if (intersections.containsKey(Edge.LEFT)) {
+								Point t2 = intersections.get(Edge.LEFT);
+								if (t1.x - block.getX() < block.getY() + block.getHeight() - t2.y) {
+									return new Tuple<>(Edge.LEFT, t2);
+								}
+							} else if (intersections.containsKey(Edge.RIGHT)) {
+								Point t2 = intersections.get(Edge.RIGHT);
+								if ((block.getX() + block.getWidth() - t1.x)
+										< block.getY() + block.getHeight() - t2.y) {
+									return new Tuple<>(Edge.RIGHT, t2);
+								}
+							}
+							return new Tuple<>(Edge.BOTTOM, t1);
+						} else if (intersections.containsKey(Edge.TOP)) {
+							Point t1 = intersections.get(Edge.TOP);
+							if (intersections.containsKey(Edge.LEFT)) {
+								Point t2 = intersections.get(Edge.LEFT);
+								if (t1.x - block.getX() < t2.y - block.getHeight()) {
+									return new Tuple<>(Edge.LEFT, t2);
+								}
+							} else if (intersections.containsKey(Edge.RIGHT)) {
+								Point t2 = intersections.get(Edge.RIGHT);
+								if ((block.getX() + block.getWidth() - t1.x)
+										< t2.y - block.getHeight()) {
+									return new Tuple<>(Edge.RIGHT, t2);
+								}
+							}
+							return new Tuple<>(Edge.TOP, intersections.get(Edge.TOP));
+						}
+					}
+				}
 			}
 		}
-		return Edge.NONE;
-	}
-	/**
-	 * Determine whether the item has one or multiple intersections
-	 * @param item The item to check.
-	 * @return The edge of collision.
-	 */
-	private synchronized Tuple<Edge, Point> hasTangentOrIntersection2(Item item) {
-		double relativeX, relativeY, w, h;
-		relativeX = (this.posx + this.radius) - item.getX();
-		relativeY = (this.posy + this.radius) - item.getY();
-		w = item.getWidth();
-		h = item.getHeight();
 
-		Point a = new Point(relativeX, relativeY + h);
-		Point b = new Point(relativeX + w, relativeY + h);
-		Point c = new Point(relativeX + w, relativeY);
-		Point d = new Point(relativeX, relativeY);
-		Point invalid = new Point(Point.INVALID_X, Point.INVALID_Y);
-
-		//Create a small bounding box since calculateDiscriminant uses infinite lines instead of
-		// the finite we have.
-		if (item.getX() < this.posx + (this.radius) &&
-				(item.getX() + item.getWidth()) > this.posx &&
-				item.getY() < this.posy + (this.radius) &&
-				item.getY() + item.getHeight() > this.posy) {
-			Point intersect = calculateIntersection(a, b);
-			if (!intersect.equals(invalid)) {
-				return new Tuple<>(Edge.BOTTOM, intersect);
-			}
-			intersect = calculateIntersection(b, c);
-			if (!intersect.equals(invalid)) {
-				return new Tuple<>(Edge.BOTTOM, intersect);
-			}
-			intersect = calculateIntersection(c, d);
-			if (!intersect.equals(invalid)) {
-				return new Tuple<>(Edge.BOTTOM, intersect);
-			}
-			intersect = calculateIntersection(d, a);
-			if (!intersect.equals(invalid)) {
-				return new Tuple<>(Edge.BOTTOM, intersect);
-			}
-		}
-		return new Tuple<>(Edge.NONE, invalid);
+		return new Tuple<>(Edge.NONE, new Point(Point.INVALID_X, Point.INVALID_Y));
 	}
 
-	/**
-	 * Calculates the discriminant between the ball and a line. Returns < 0 for no intersection,
-	 * = 0 for 1 intersection, > 0 for 2 intersections.
-	 * @param p1 The coordinates of point 1
-	 * @param p2 The coordinates of point 2
-	 * @return The discriminant,
-	 */
-	private synchronized double calculateDiscriminant(Point p1, Point p2) {
-		double dx, dy, dr, D;
+	private Point calculateIntersection(Point p1, Point p2, double tx, double ty) {
+		double dx, dy, dr, D, resX1, resX2, resY1, resY2, disc;
 
 		dx = p2.x - p1.x;
 		dy = p2.y - p1.y;
 		dr = Math.sqrt(dx * dx + dy * dy);
 		D = p1.x * p2.y - p2.x * p1.y;
-		return (this.radius * this.radius) * (dr * dr) - (D * D);
-	}
-
-	private Point calculateIntersection(Point p1, Point p2) {
-		double dx, dy, dr, D, resX, resY;
-
-		dx = p2.x - p1.x;
-		dy = p2.y - p1.y;
-		dr = Math.sqrt(dx * dx + dy * dy);
-		D = p1.x * p2.y - p2.x * p1.y;
-
-		if (dr != 0) {
-			resX = (D * dy + sign(dy) * dx *
+		disc = (this.radius * this.radius) * (dr * dr) - (D * D);
+		if (dr != 0 && disc >= 0 && compareDoubles(disc, 0, 0.1) >= 0) {
+			resX1 = (D * dy + sign(dy) * dx *
 					Math.sqrt((this.radius * this.radius) * (dr * dr) - (D * D))) / (dr * dr);
-			resY = (-D * dx + Math.abs(dy) *
+			resX2 = (D * dy - sign(dy) * dx *
+					Math.sqrt((this.radius * this.radius) * (dr * dr) - (D - D))) / (dr * dr);
+			resY1 = (-D * dx + Math.abs(dy) *
 					Math.sqrt((this.radius * this.radius) * (dr * dr) - (D * D))) / (dr * dr);
-
-			/*if (resX >= Math.min(p1.x, p2.x) && resX <= Math.max(p1.x, p2.x)
-					&& resY >= Math.min(p1.y, p2.y) && resY <= Math.max(p1.y, p2.y)) {
-				return new Point(resX, resY);
-			}*/
-			return new Point(resX, resY);
+			resY2 = (-D * dx - Math.abs(dy) *
+					Math.sqrt((this.radius * this.radius) * (dr * dr) - (D * D))) / (dr * dr);
+			return new Point((tx + this.radius) + ((resX1 + resX2) / 2),
+					(ty + this.radius) + ((resY1 + resY2) / 2));
 		}
 		return new Point(Point.INVALID_X, Point.INVALID_Y);
 	}
 
-	private double sign(double x) {
-		return x < 0 ? -1 : x;
+	private double sign (double d) {
+		return d < 0 ? -1 : 1;
 	}
 
-	public Tuple<Ball.Edge, Ball.Point> intersect(Item item, double nx, double ny) {
-		double itemX, itemY, w, h;
-		itemX = item.getX();
-		itemY = item.getY();
-		w = item.getWidth();
-		h = item.getHeight();
-		HashMap<Edge, Point> hits = new HashMap<>();
-		Point ballOld = new Point(this.posx + this.radius, this.posy + this.radius);
-		Point ballNew = new Point(nx + this.radius, this.posy + this.radius);
-		Point itemA = new Point(itemX, itemY + h);
-		Point itemB = new Point(itemX + w, itemY + h);
-		Point itemC = new Point(itemX + w, itemY);
-		Point itemD = new Point(itemX, itemY);
-		Point invalid = new Point(Point.INVALID_X, Point.INVALID_Y);
+	public boolean ballGoesUp() {
+		return this.heading > 180 && this.heading < 360;
+	}
 
-		Point p = this.lineIntersect(ballOld, ballNew, itemA, itemB);
-		if (!p.equals(invalid)) {
-			hits.put(Edge.BOTTOM, p);
-		}
-		p = this.lineIntersect(ballOld, ballNew, itemB, itemC);
-		if (!p.equals(invalid)) {
-			System.out.printf("Hit on Right:\n" +
-							"\tBall: (%f, %f) (%f, %f)\n" +
-							"\tEdge: (%f, %f), (%f, %f)\n" +
-							"\tHit:  (%f, %f)\n", ballOld.x, ballOld.y, ballNew.x, ballNew.y, itemB.x, itemB.y,
-					itemC.x, itemC.y, p.x, p.y);
-			hits.put(Edge.RIGHT, p);
-		}
-		p = this.lineIntersect(ballOld, ballNew, itemC, itemD);
-		if (!p.equals(invalid)
-				&& compareDoubles(p.y, itemC.y, 0.1) == 0
-				&& compareDoubles(p.x, itemC.x, 0.1) < 0
-				&& compareDoubles(p.x, itemD.x, 0.1) > 0) {
-			hits.put(Edge.TOP, p);
-		}
-		p = this.lineIntersect(ballOld, ballNew, itemD, itemA);
-		if (!p.equals(invalid)
-				&& compareDoubles(p.x, itemB.x, 0.1) == 0
-				&& compareDoubles(p.y, itemB.y, 0.1) < 0
-				&& compareDoubles(p.y, itemC.y, 0.1) > 0) {
-			hits.put(Edge.LEFT, p);
-		}
+	public boolean ballGoesDown() {
+		return this.heading < 180 && this.heading > 0;
+	}
 
-		if (hits.size() > 1) {
-			System.out.println("GOT TOO MANY HITS NOOOOOO");
-			for (Map.Entry<Edge, Point> entry : hits.entrySet()) {
-				return new Tuple<>(entry.getKey(), entry.getValue());
-			}
-		} else if (hits.size() == 1) {
-			for (Map.Entry<Edge, Point> entry : hits.entrySet()) {
-				return new Tuple<>(entry.getKey(), entry.getValue());
-			}
-		}
-		return new Tuple<>(Edge.NONE, invalid);
+	public boolean ballGoesLeft() {
+		return this.heading < 270 && this.heading > 90;
+	}
+
+	public boolean ballGoesRight() {
+		return this.heading > 270 && this.heading < 90;
 	}
 
 	/**
@@ -282,33 +260,6 @@ public class Ball extends Item {
 			return -1;
 		}
 		return 1;
-	}
-
-	/**
-	 * Checks whether the line between p1-p2 and p3-p4 intersect.
-	 * @param p1 first point
-	 * @param p2 second point
-	 * @param p3 third point
-	 * @param p4 fourth point.
-	 * @return Point of intersection, or invalid if no intersection.
-	 */
-	private Point lineIntersect(Point p1, Point p2, Point p3, Point p4) {
-		double resX, resY, D;
-		/**/
-		//(x1-x2)(y3-y4) - (y1-y2)(x3-x4)
-		D = (p1.x - p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x - p4.x);
-		if (D != 0) {
-			resX = ((p1.x*p2.y - p1.y*p2.x)*(p3.x - p4.x) - (p1.x - p2.x)*(p3.x*p4.y - p3.y*p4.x)) /
-					D;
-			resY = ((p1.x*p2.y - p1.y*p2.x)*(p3.y - p4.y) - (p1.y - p2.y)*(p3.x*p4.y - p3.y*p4.x)) /
-					D;
-
-			if (resX > Math.min(p1.x, p2.x) && resX < Math.max(p1.x, p2.x)
-				&& resX > Math.min(p3.x, p4.x) && resX < Math.max(p3.x, p4.x)) {
-				return new Point(resX, resY);
-			}
-		}
-		return new Point(Point.INVALID_X, Point.INVALID_Y);
 	}
 
 	/**

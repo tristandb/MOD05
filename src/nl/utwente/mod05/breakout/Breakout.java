@@ -7,6 +7,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 import nl.utwente.mod05.breakout.input.CameraInputHandler;
+import nl.utwente.mod05.breakout.input.CheatInputHandler;
 import nl.utwente.mod05.breakout.input.InputHandler;
 import nl.utwente.mod05.breakout.input.MouseInputHandler;
 import nl.utwente.mod05.breakout.model.Board;
@@ -59,9 +60,17 @@ public class Breakout extends Application {
 
 			Board board = new Board(width, height);
 
-			InputHandler input;
-			if (params.containsKey("input") && params.get("input").equals("camera")) {
-				input = new CameraInputHandler(width);
+			InputHandler input = null;
+			if (params.containsKey("input")) {
+				System.out.println(params.get("input"));
+				if (params.get("input").equals("camera")) {
+					input = new CameraInputHandler(width, System.in);
+				} else if (params.get("input").equals("cheat")) {
+					input = new CheatInputHandler(width, board);
+				}
+				if (input == null) {
+					input = new MouseInputHandler(width, scene);
+				}
 			} else {
 				input = new MouseInputHandler(width, scene);
 			}
@@ -71,13 +80,15 @@ public class Breakout extends Application {
 			controller.setInputHandler(input);
 			controller.createGUI();
 			input.handle();
-			scene.setOnMouseClicked(
-					event -> {
-						if (!board.isRunning()) {
-							controller.startGame();
+			if (input instanceof MouseInputHandler || input instanceof CheatInputHandler) {
+				scene.setOnMouseClicked(
+						event -> {
+							if (!board.isRunning()) {
+								controller.startGame();
+							}
 						}
-					}
-			);
+				);
+			}
 			if (getBoolFromParam(params, "fullscreen", false)) {
 				primaryStage.setFullScreen(true);
 			} else {

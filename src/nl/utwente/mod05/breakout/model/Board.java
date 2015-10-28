@@ -4,10 +4,8 @@ import nl.utwente.mod05.breakout.Breakout;
 import nl.utwente.mod05.breakout.input.InputHandler;
 import nl.utwente.mod05.breakout.model.items.*;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Model class representing a board.
@@ -25,6 +23,7 @@ public class Board {
 	private int height;
 	private int score;
 	private Paddle paddle;
+	private Ball.Point lastHit;
 
 	private List<Block> blocks;
 	private Ball ball;
@@ -69,6 +68,7 @@ public class Board {
 		int blockWidth = width / BLOCKS_PER_ROW;
 		int id = 0;
 		this.blocks = new LinkedList<>();
+		Block prev = null;
 		for (int r = 0; r < BLOCK_ROWS; r++) {
 			int colorRows = BLOCK_ROWS - 1;
 			if (colorRows > Block.DEFAULT_COLORS.length) {
@@ -78,7 +78,7 @@ public class Board {
 
 			for (int c = 0; c < BLOCKS_PER_ROW; c++) {
 				id++;
-				this.blocks.add(new Block(
+				Block block = new Block(
 						c * blockWidth,
 						r * Block.DEFAULT_HEIGHT,
 						blockWidth,
@@ -86,7 +86,18 @@ public class Board {
 						color,
 						BLOCK_ROWS - r,
 						id
-				));
+				);
+				if (c != 0) {
+					block.setLeft(prev);
+					prev.setRight(block);
+				}
+				if (r != 0) {
+					Block top = this.blocks.get(id - BLOCKS_PER_ROW);
+					top.setBottom(block);
+					block.setTop(top);
+				}
+				this.blocks.add(block);
+				prev = block;
 			}
 		}
 		//Reverse the blocks order, this will make it quicker to determine hits.
@@ -96,6 +107,14 @@ public class Board {
 		this.running = false;
 		this.paused = false;
 		this.score = 0;
+	}
+
+	public Ball getBall() {
+		return this.ball;
+	}
+
+	public Paddle getPaddle() {
+		return this.paddle;
 	}
 
 	/**
@@ -227,46 +246,68 @@ public class Board {
 			newY = newY < 0 ? 1 : newY > this.height ? this.height - 2 * this.ball.getRadius() :
 					newY;
 
-			//Check if the ball hit any blocks.
-			LinkedList<Block> tblocks = new LinkedList<>(this.blocks);
-			for (Block b : tblocks) {
-				if (b != null) {
-					//hitOn variable representing the edge of the block where the ball hit the block
-					Ball.Tuple<Ball.Edge, Ball.Point> t = this.ball.intersects(b);
-					Ball.Edge hitOn = t.first;
-					Ball.Point hitOnPoint =  t.second;
-					if (hitOn != Ball.Edge.NONE) {
-						if (Breakout.DEBUG) {
-							System.out.println(hitOn);
-						}
-						//If blocks on the highest row are hit the first time, increase speed and
-						// reduce the paddle size
-						if (b.getRow() == BLOCK_ROWS && !this.lastRowHit) {
-							this.lastRowHit = true;
-							this.ball.setVelocity(speed * Ball.SPEED_MULTIPLIER);
-							this.paddle.setWidth(this.paddle.getWidth() / 2);
-						}
-						//If blocks on the second to highest row are hit the first time, increase speed
-						if (b.getRow() == BLOCK_ROWS - 1 && !this.secondToLastRowHit) {
-							this.secondToLastRowHit = true;
-							this.ball.setVelocity(speed * Ball.SPEED_MULTIPLIER);
-						}
+			//Check if the ball hit any blocks. But only if it is possible a block might be hit.
+			if (newY < BLOCK_ROWS * Block.DEFAULT_HEIGHT) {
+				LinkedList<Block> tblocks = new LinkedList<>(this.blocks);
+				for (Block b : tblocks) {
+					if (b != null) {
+						//hitOn variable representing the edge of the block where the ball hit the block
+						Ball.Tuple<Ball.Edge, Ball.Point> t = this.ball.intersects(newX, newY, b);
+						Ball.Edge hitOn = t.first;
+						Ball.Point hitOnPoint =  t.second;
+						if (hitOn != Ball.Edge.NONE) {
+							if (Breakout.DEBUG) {
+								System.out.println(hitOn + " width heading " + this.ball.getHeading());
+							}
+
+							//Increase score based on row identifier.
+							this.score += b.getRow();
+
+							//If blocks on the highest row are hit the first time, increase speed and
+							// reduce the paddle size
+							if (b.getRow() == BLOCK_ROWS && !this.lastRowHit) {
+								this.lastRowHit = true;
+								this.ball.setVelocity(speed * Ball.SPEED_MULTIPLIER);
+								this.paddle.setWidth(this.paddle.getWidth() / 2);
+							} else if (b.getRow() == BLOCK_ROWS - 1 && !this.secondToLastRowHit) {
+								//If blocks on the second to highest row are hit the first time,
+								// increase speed
+								this.secondToLastRowHit = true;
+								this.ball.setVelocity(speed * Ball.SPEED_MULTIPLIER);
+							}
 
 
-						//Calculate new ball heading
-						if (hitOn.equals(Ball.Edge.TOP) || hitOn.equals(Ball.Edge.BOTTOM)) {
-							heading = 360 - this.ball.getHeading();
-						} else {
-							heading = 180 - this.ball.getHeading();
+							//Calculate new ball heading
+							if (hitOn.equals(Ball.Edge.TOP) || hitOn.equals(Ball.Edge.BOTTOM)) {
+								heading = 360 - this.ball.getHeading();
+							} else {
+								heading = 180 - this.ball.getHeading();
+							}
+
+							//Remove block from the list.
+							Block temp;
+							if (b.hasBottom()) {
+								b.getBottom().setTop(null);
+							}
+							if (b.hasLeft()) {
+								b.getLeft().setRight(null);
+							}
+							if (b.hasRight()) {
+								b.getRight().setLeft(null);
+							}
+							if (b.hasTop()) {
+								b.getTop().setBottom(null);
+							}
+							this.blocks.remove(b);
+
+							newX = this.ball.getX();
+							newY = this.ball.getY();
+							//newX = hitOnPoint.x - this.ball.getRadius();
+							//newY = hitOnPoint.y - this.ball.getRadius();
+							this.lastHit = hitOnPoint;
+							//Only do 1 hit per frame.
+							break;
 						}
-
-						//Remove block from the list.
-						this.blocks.remove(b);
-						newX = this.ball.getX();
-						newY = this.ball.getY();
-
-						//Only do 1 hit per frame.
-						break;
 					}
 				}
 			}
@@ -278,5 +319,8 @@ public class Board {
 			this.ball.setHeading(heading % 360);
 
 		}
+	}
+	public Ball.Point lastHitPoint() {
+		return this.lastHit;
 	}
 }
