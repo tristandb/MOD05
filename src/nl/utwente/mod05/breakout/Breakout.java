@@ -61,7 +61,7 @@ public class Breakout extends Application {
 
 			InputHandler input;
 			if (params.containsKey("input") && params.get("input").equals("camera")) {
-				input = new CameraInputHandler(width);
+				input = new CameraInputHandler(width, System.in);
 			} else {
 				input = new MouseInputHandler(width, scene);
 			}
@@ -71,13 +71,15 @@ public class Breakout extends Application {
 			controller.setInputHandler(input);
 			controller.createGUI();
 			input.handle();
-			scene.setOnMouseClicked(
-					event -> {
-						if (!board.isRunning()) {
-							controller.startGame();
+			if (input instanceof MouseInputHandler) {
+				scene.setOnMouseClicked(
+						event -> {
+							if (!board.isRunning()) {
+								controller.startGame();
+							}
 						}
-					}
-			);
+				);
+			}
 			if (getBoolFromParam(params, "fullscreen", false)) {
 				primaryStage.setFullScreen(true);
 			} else {

@@ -9,6 +9,10 @@ public class Block extends Item {
 
 	public int id;
 	private int row;
+	private Block bottom;
+	private Block right;
+	private Block top;
+	private Block left;
 
 	/**
 	 * Instantiates a block.
@@ -32,5 +36,51 @@ public class Block extends Item {
 	 */
 	public int getRow() {
 		return this.row;
+	}
+
+
+	public void setBottom(Block bottom) {
+		this.bottom = bottom;
+	}
+
+	public void setRight(Block right) {
+		this.right = right;
+	}
+
+	public void setTop(Block top) {
+		this.top = top;
+	}
+
+	public void setLeft(Block left) {
+		this.left = left;
+	}
+
+	public Block getBottom() {
+		return bottom;
+	}
+
+	public Block getRight() {
+		return right;
+	}
+
+	public Block getTop() {
+		return top;
+	}
+
+	public Block getLeft() {
+		return left;
+	}
+
+	public boolean hasBottom() {
+		return this.bottom != null;
+	}
+	public boolean hasRight() {
+		return this.right != null;
+	}
+	public boolean hasTop() {
+		return this.top != null;
+	}
+	public boolean hasLeft() {
+		return this.left != null;
 	}
 }
