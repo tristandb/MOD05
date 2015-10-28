@@ -5,15 +5,27 @@ import nl.utwente.mod05.breakout.model.Board;
 import java.util.Random;
 
 /**
- * Created by jelle on 28-10-15.
+ * CheatInputHandler will always set input to ball position (plus a random factor). This means
+ * that it is impossible to lose using this input handler.
  */
 public class CheatInputHandler extends InputHandler {
 	private Board board;
+
+	/**
+	 * Instantiates a CheatInputHandler.
+	 * @param width The maximum width the input
+	 * @param board The board used for the game, the inputhandler will get the ball position from
+	 *                 this board.
+	 */
 	public CheatInputHandler(int width, Board board) {
 		super(width);
 		this.board = board;
 	}
 
+
+	/**
+	 * Handler is not needed by the cheatinputhandler
+	 */
 	@Override
 	public synchronized void handle() {
 

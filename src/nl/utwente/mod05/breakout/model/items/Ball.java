@@ -88,7 +88,6 @@ public class Ball extends Item {
 
 	/**
 	 * Determines whether the ball has hit an Item, returns the edge of collision.
-	 * TODO: new implementation using simple line intersections. Possible better results.
 	 * @param block The item to check.
 	 * @return The edge of collision, either none, top, left, right or bottom.
 	 */
@@ -106,6 +105,7 @@ public class Ball extends Item {
 		double relativeX, relativeY, w, h, tx, ty, dx, dy, linelength;
 		dx = this.posx - newX;
 		dy = this.posy - newY;
+		//dy = newY - this.posy;
 		linelength = Math.sqrt(Math.abs(dx * dx) + Math.abs(dy * dy));
 
 		if (!(this.ballGoesUp() && this.ballGoesLeft() && block.hasBottom() && block.hasRight())
@@ -163,7 +163,6 @@ public class Ball extends Item {
 					}
 
 					if (intersections.size() >= 1) {
-						//TODO: Do something with multiple intersections.
 						if (intersections.containsKey(Edge.BOTTOM)) {
 							Point t1 = intersections.get(Edge.BOTTOM);
 							if (intersections.containsKey(Edge.LEFT)) {
@@ -203,7 +202,7 @@ public class Ball extends Item {
 		return new Tuple<>(Edge.NONE, new Point(Point.INVALID_X, Point.INVALID_Y));
 	}
 
-	private Point calculateIntersection(Point p1, Point p2, double tx, double ty) {
+	private Point calculateIntersection(Point p2, Point p1, double tx, double ty) {
 		double dx, dy, dr, D, resX1, resX2, resY1, resY2, disc;
 
 		dx = p2.x - p1.x;
@@ -211,17 +210,13 @@ public class Ball extends Item {
 		dr = Math.sqrt(dx * dx + dy * dy);
 		D = p1.x * p2.y - p2.x * p1.y;
 		disc = (this.radius * this.radius) * (dr * dr) - (D * D);
-		if (dr != 0 && disc >= 0 && compareDoubles(disc, 0, 0.1) >= 0) {
-			resX1 = (D * dy + sign(dy) * dx *
-					Math.sqrt((this.radius * this.radius) * (dr * dr) - (D * D))) / (dr * dr);
-			resX2 = (D * dy - sign(dy) * dx *
-					Math.sqrt((this.radius * this.radius) * (dr * dr) - (D - D))) / (dr * dr);
-			resY1 = (-D * dx + Math.abs(dy) *
-					Math.sqrt((this.radius * this.radius) * (dr * dr) - (D * D))) / (dr * dr);
-			resY2 = (-D * dx - Math.abs(dy) *
-					Math.sqrt((this.radius * this.radius) * (dr * dr) - (D * D))) / (dr * dr);
-			return new Point((tx + this.radius) + ((resX1 + resX2) / 2),
-					(ty + this.radius) + ((resY1 + resY2) / 2));
+		if (dr != 0 && compareDoubles(disc, 0, 0.1) >= 0) {
+			resX1 = (D * dy + sign(dy) * dx * Math.sqrt(disc)) / (dr * dr);
+			resX2 = (D * dy - sign(dy) * dx * Math.sqrt(disc)) / (dr * dr);
+			resY1 = (-D * dx + Math.abs(dy) * Math.sqrt(disc)) / (dr * dr);
+			resY2 = (-D * dx - Math.abs(dy) * Math.sqrt(disc)) / (dr * dr);
+			return new Point(Math.max(0, (tx + this.radius) + ((resX1 + resX2) / 2)),
+					Math.max(0, (ty + this.radius) + ((resY1 + resY2) / 2)));
 		}
 		return new Point(Point.INVALID_X, Point.INVALID_Y);
 	}

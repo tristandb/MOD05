@@ -17,8 +17,9 @@ public class CameraInputHandler extends InputHandler {
 		this.stream = in;
 	}
 
+
 	@Override
-	public synchronized void handle() {
+	public synchronized int getInput() {
 		try {
 			if (this.stream.available() > 2) {
 				byte[] bytes = new byte[INPUT_BITS / 8 + 1];
@@ -45,5 +46,8 @@ public class CameraInputHandler extends InputHandler {
 			}
 			this.position = InputHandler.ERROR_STATE;
 		}
+		return this.position;
 	}
+
+	public synchronized void handle() {}
 }
