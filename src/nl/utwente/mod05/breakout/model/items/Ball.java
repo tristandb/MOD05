@@ -14,7 +14,7 @@ import java.util.HashSet;
 public class Ball extends Item {
 	public static final double DEFAULT_RADIUS = 10;
 	public static final double DEFAULT_HEADING = 90;
-	public static final double DEFAULT_VELOCITY = 0; //Pixels per frame
+	public static final double DEFAULT_VELOCITY = 5; //Pixels per frame
 	public static final double SPEED_MULTIPLIER = 1.3;
 	public static final HashSet<Integer> MULTIPLY_ON_HIT = new HashSet<>(Arrays.asList(new
 			Integer[] {4, 12}));

@@ -4,10 +4,8 @@ import nl.utwente.mod05.breakout.Breakout;
 import nl.utwente.mod05.breakout.input.InputHandler;
 import nl.utwente.mod05.breakout.model.items.*;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Model class representing a board.
@@ -109,6 +107,14 @@ public class Board {
 		this.running = false;
 		this.paused = false;
 		this.score = 0;
+	}
+
+	public Ball getBall() {
+		return this.ball;
+	}
+
+	public Paddle getPaddle() {
+		return this.paddle;
 	}
 
 	/**
@@ -279,8 +285,21 @@ public class Board {
 							}
 
 							//Remove block from the list.
+							Block temp;
+							if (b.hasBottom()) {
+								b.getBottom().setTop(null);
+							}
+							if (b.hasLeft()) {
+								b.getLeft().setRight(null);
+							}
+							if (b.hasRight()) {
+								b.getRight().setLeft(null);
+							}
+							if (b.hasTop()) {
+								b.getTop().setBottom(null);
+							}
 							this.blocks.remove(b);
-							b = null;
+
 							newX = this.ball.getX();
 							newY = this.ball.getY();
 							//newX = hitOnPoint.x - this.ball.getRadius();
