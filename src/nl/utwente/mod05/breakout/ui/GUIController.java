@@ -8,11 +8,13 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 import nl.utwente.mod05.breakout.Breakout;
 import nl.utwente.mod05.breakout.input.InputHandler;
 import nl.utwente.mod05.breakout.model.Board;
 import nl.utwente.mod05.breakout.model.Score;
 import nl.utwente.mod05.breakout.model.ScoreList;
+import nl.utwente.mod05.breakout.model.items.Ball;
 import nl.utwente.mod05.breakout.model.items.Item;
 
 import java.util.List;
@@ -30,7 +32,7 @@ public class GUIController {
 
 	private Board board;
 	private InputHandler inputHandler;
-	private GraphicsContext context;
+	public static GraphicsContext context;
 
 	/**
 	 * Creates the GUI, does not draw Items on the canvas.
@@ -44,6 +46,7 @@ public class GUIController {
 		this.context = cv.getGraphicsContext2D();
 		this.updateScoreTable();
 
+		GUIController.context = cv.getGraphicsContext2D();
 	}
 
 	/**
@@ -61,7 +64,7 @@ public class GUIController {
 	 */
 	public void startGame() {
 		//Make a direct copy of the context object, for speed reasons.
-		GraphicsContext gc = this.context;
+		GraphicsContext gc = GUIController.context;
 		//Reset the board to default values, this is useful for restarting after a stop.
 		this.board.reset(this.board.getWidth(), this.board.getHeight());
 		this.board.start();
@@ -83,14 +86,6 @@ public class GUIController {
 					board.unpause();
 				}
 
-				if (!board.isRunning() && !board.isPaused()) {
-					if (Breakout.DEBUG) {
-						System.out.println("Score: " + board.getScore());
-					}
-					//Stop the AnimationTimer.
-					this.stop();
-				}
-
 				board.setPaddlePosition(input);
 
 				//Draw all items on the canvas. This will draw the whole game layout.
@@ -101,12 +96,25 @@ public class GUIController {
 						gc.fillOval(item.getX(), item.getY(), item.getWidth(), item.getHeight());
 					} else {
 						gc.fillRect(item.getX(), item.getY(), item.getWidth(), item.getHeight());
+						gc.setStroke(new Color(0, 0, 0, 0.5));
+						gc.strokeRect(item.getX(), item.getY(), item.getWidth(), item.getHeight());
 					}
+				}
+				if (board.lastHitPoint() != null) {
+					gc.setStroke(Color.RED);
+					gc.strokeOval(board.lastHitPoint().x, board.lastHitPoint().y, Ball
+							.DEFAULT_RADIUS * 2, Ball.DEFAULT_RADIUS * 2);
+				}
+
+
+				if (!board.isRunning() && !board.isPaused()) {
+					createOverlay(gc, "Score: " + board.getScore());
+					//Stop the AnimationTimer.
+					this.stop();
 				}
 
 				if (board.isPaused()) {
-					gc.setFill(new Color(0, 0, 0, 0.5));
-					gc.fillRect(0, 0, board.getWidth(), board.getHeight());
+					createOverlay(gc, "Paused");
 				}
 
 				//On DEBUG, show FPS counter in the upper left corner.
@@ -118,6 +126,16 @@ public class GUIController {
 				oldTime = currentTime;
 			}
 		}.start();
+	}
+
+	private void createOverlay(GraphicsContext gc, String text) {
+		gc.setFill(new Color(0, 0, 0, 0.75));
+		gc.fillRect(0, 0, this.board.getWidth(), this.board.getHeight());
+		gc.setFill(Color.WHITE);
+		gc.setStroke(Color.BLACK);
+		gc.setFont(new Font(24));
+		gc.setTextAlign(TextAlignment.CENTER);
+		gc.fillText(text, this.board.getWidth() / 2, this.board.getHeight() / 2);
 	}
 
 	/**

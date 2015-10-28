@@ -16,6 +16,7 @@ public abstract class InputHandler {
 	 */
 	public InputHandler(int width) {
 		this.maxWidth = width;
+		this.position = ERROR_STATE;
 	}
 	/**
 	 * Handles input, each input handler should implement it's own handle method, depending on
