@@ -21,7 +21,6 @@ public class ScoreList {
         List<Map<String, Object>> highscores = DatabaseConnector.getInstance().getHighscores();
         for(Map<String, Object> highscore: highscores) {
             scoreObservableList.add(new Score(highscore.get("name").toString(), (Integer) highscore.get("score")));
-            System.out.println(highscore.get("name").toString() + (Integer) highscore.get("score"));
         }
     }
 
