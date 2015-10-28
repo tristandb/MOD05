@@ -11,6 +11,8 @@ import javafx.scene.text.Font;
 import nl.utwente.mod05.breakout.Breakout;
 import nl.utwente.mod05.breakout.input.InputHandler;
 import nl.utwente.mod05.breakout.model.Board;
+import nl.utwente.mod05.breakout.model.Score;
+import nl.utwente.mod05.breakout.model.ScoreList;
 import nl.utwente.mod05.breakout.model.items.Item;
 
 import java.util.List;
@@ -22,7 +24,7 @@ public class GUIController {
 	@FXML
 	private BorderPane borderPane;
 	@FXML
-	private TableView<?> scores;
+	private TableView<Score> scores;
 	@FXML
 	private Canvas cameraCanvas;
 
@@ -40,8 +42,20 @@ public class GUIController {
 		Canvas cv = new Canvas(width, height);
 		this.borderPane.setCenter(cv);
 		this.context = cv.getGraphicsContext2D();
+		this.updateScoreTable();
+
 	}
 
+	/**
+	 * Updates the scoretable
+	 */
+	@FXML
+	public void updateScoreTable(){
+		// Remove all elements
+		scores.getItems().removeAll(scores.getItems());
+		// Add new elements
+		scores.setItems((new ScoreList()).getScoreList());
+	}
 	/**
 	 * Starts the game.
 	 */

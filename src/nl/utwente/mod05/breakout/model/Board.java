@@ -2,12 +2,13 @@ package nl.utwente.mod05.breakout.model;
 
 import nl.utwente.mod05.breakout.Breakout;
 import nl.utwente.mod05.breakout.input.InputHandler;
-import nl.utwente.mod05.breakout.model.items.*;
+import nl.utwente.mod05.breakout.model.items.Ball;
+import nl.utwente.mod05.breakout.model.items.Block;
+import nl.utwente.mod05.breakout.model.items.Item;
+import nl.utwente.mod05.breakout.model.items.Paddle;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Model class representing a board.
@@ -141,7 +142,7 @@ public class Board {
 	 * @return a list of all items on the board.
 	 */
 	public synchronized List<Item> getItems() {
-		List<Item> result = new LinkedList<>(this.blocks);
+		List<Item> result = new LinkedList<Item>(this.blocks);
 		result.add(this.ball);
 		result.add(this.paddle);
 		return result;
