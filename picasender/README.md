@@ -1,28 +1,16 @@
 # Picasender
-This application sends one byte of an RGB-set over GPIO pins to an FPGA.
+This application sends one byte of an RGB-set over SPI to the FPGA.
 ## Installing
 First, Python must be installed on your Raspberry Pi. I assume you know how to do this.
-When Python is installed, you can install picamera. For instructions please read their website: https://picamera.readthedocs.org/en/release-1.10/install2.html.
-You'll also need RPi.GPIO. For further instructions, please read https://pypi.python.org/pypi/RPi.GPIO.
+When Python is installed, you can install [picamera](https://picamera.readthedocs.org/en/release-1.10/install2.html). You'll also need [py-spidev](https://github.com/doceme/py-spidev), which is included in this folder. Finally, you might need to install [NumPy](http://docs.scipy.org/doc/numpy/user/install.html). Most Linux distributions will provide packages for NumPy.
+The camera on your Raspberry Pi might not be enabled by default. You can enable it by typing `sudo raspi-config` and enabling *picamera*.
 
-# Running
+## Connecting Raspberry Pi to the FPGA
+//TODO
 
-# Ports
-Data bit | Data pin | Altera pin | GPIO PIN
----------|----------|------------|---------- 
-7 	 | 13	    | color | 27
-6 	 | 15	    |	color | 22
-5 	 | 16	    |	color | 23
-4 	 | 18     | color | 24
-3 	 | 22	    | color | 25
-2 	 | 31	    |	color | 06
-1 	 | 32	    | color | 12
-0 	 | 38	    |	color | 20
+## Running
+Running the application is very easy. Use `sudo python spyinterface.py`. This will run the camera and the GUI of Augmented Breakout. Locations aquired by the FPGA will be passed trough a named pipe to the GUI.
 
-Other pins          | Pin | Altera pin | GPIO Pin
---------------------|-----|------------|----------
-Request a new image | 33  | frame | 13
-Request next data   | 35  | received | 19 
-Output new data	    | 36  | receive | 16
-Serial location     | 37  | location | 26
+## Other remarks
+
 
