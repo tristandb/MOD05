@@ -64,7 +64,7 @@ public class Breakout extends Application {
 			if (params.containsKey("input")) {
 
 				if (params.get("input").equals("camera")) {
-					String pipeName = this.getStringFromParam(params, "pipeName",
+					String pipeName = this.getStringFromParam(params, "pipename",
 							CameraInputHandler.DEFAULT_INPUT_NAME);
 					input = new CameraInputHandler(width, pipeName);
 				} else if (params.get("input").equals("cheat")) {
