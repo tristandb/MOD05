@@ -13,10 +13,7 @@ import nl.utwente.mod05.breakout.input.MouseInputHandler;
 import nl.utwente.mod05.breakout.model.Board;
 import nl.utwente.mod05.breakout.ui.GUIController;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 
 /**
