@@ -7,13 +7,10 @@ import nl.utwente.mod05.breakout.model.items.Ball;
 import nl.utwente.mod05.breakout.model.items.Block;
 import nl.utwente.mod05.breakout.model.items.Item;
 import nl.utwente.mod05.breakout.model.items.Paddle;
-import nl.utwente.mod05.breakout.model.items.*;
 import nl.utwente.mod05.breakout.ui.GUIController;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Model class representing a board.
@@ -168,7 +165,8 @@ public class Board {
 	 * @return a list of all items on the board.
 	 */
 	public synchronized List<Item> getItems() {
-		List<Item> result = new LinkedList<Item>(this.blocks);
+		List<Item> result;
+		result = new LinkedList<>(this.blocks);
 		result.add(this.ball);
 		result.add(this.paddle);
 		return result;
@@ -285,12 +283,6 @@ public class Board {
 								this.secondToLastRowHit = true;
 								this.ball.setVelocity(speed * Ball.SPEED_MULTIPLIER);
 							}
-
-						//Remove block from the list.
-						this.blocks.remove(b);
-						newX = this.ball.getX();
-						newY = this.ball.getY();
-
 							//Calculate new ball heading
 							if (hitOn.equals(Ball.Edge.TOP) || hitOn.equals(Ball.Edge.BOTTOM)) {
 								heading = 360 - this.ball.getHeading();
@@ -313,12 +305,6 @@ public class Board {
 							}
 							this.blocks.remove(b);
 
-							if (Breakout.DEBUG) {
-								System.out.println("X: " + newX + "-"
-										+ (hitOnPoint.x - this.ball.getRadius()));
-								System.out.println("Y: " + newY + "-"
-										+ (hitOnPoint.y - this.ball.getRadius()));
-							}
 							newX = this.ball.getX();
 							newY = this.ball.getY();
 							this.lastHit = hitOnPoint;

@@ -1,5 +1,7 @@
 package nl.utwente.mod05.breakout.helper;
 
+import nl.utwente.mod05.breakout.Breakout;
+
 import java.sql.*;
 import java.util.*;
 
@@ -69,7 +71,9 @@ public class DatabaseConnector {
                 resultList.add(resultMap);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (Breakout.DEBUG) {
+				e.printStackTrace();
+			}
         }
         return resultList;
     }
@@ -91,7 +95,9 @@ public class DatabaseConnector {
             statement.setInt(2, score);
             statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+			if (Breakout.DEBUG) {
+				e.printStackTrace();
+			}
         }
     }
 }

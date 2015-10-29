@@ -2,19 +2,30 @@ package nl.utwente.mod05.breakout.input;
 
 import nl.utwente.mod05.breakout.Breakout;
 
-import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 public class CameraInputHandler extends InputHandler {
+	public static final String DEFAULT_INPUT_NAME = "stdin";
 	public static final int INPUT_BITS = 10;
 	public static final int INPUT_MAX_WIDTH = 1024;
 	private ByteBuffer buffer;
 	private InputStream stream;
-	public CameraInputHandler(int width, InputStream in) {
+	public CameraInputHandler(int width, String pipeName) {
 		super(width);
-		this.stream = in;
+		try {
+			if (pipeName.equals(DEFAULT_INPUT_NAME)) {
+				this.stream = System.in;
+			} else {
+				this.stream = new FileInputStream(pipeName);
+			}
+		} catch (IOException e) {
+			if (Breakout.DEBUG) {
+				System.err.println("Can not read from file " + pipeName);
+			}
+		}
 	}
 
 

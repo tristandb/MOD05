@@ -13,7 +13,10 @@ import nl.utwente.mod05.breakout.input.MouseInputHandler;
 import nl.utwente.mod05.breakout.model.Board;
 import nl.utwente.mod05.breakout.ui.GUIController;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 /**
@@ -62,9 +65,11 @@ public class Breakout extends Application {
 
 			InputHandler input = null;
 			if (params.containsKey("input")) {
-				System.out.println(params.get("input"));
+
 				if (params.get("input").equals("camera")) {
-					input = new CameraInputHandler(width, System.in);
+					String pipeName = this.getStringFromParam(params, "pipeName",
+							CameraInputHandler.DEFAULT_INPUT_NAME);
+					input = new CameraInputHandler(width, pipeName);
 				} else if (params.get("input").equals("cheat")) {
 					input = new CheatInputHandler(width, board);
 				}
@@ -75,6 +80,9 @@ public class Breakout extends Application {
 				input = new MouseInputHandler(width, scene);
 			}
 
+			if (Breakout.DEBUG) {
+				System.out.println("Using input: " + input.getClass().getSimpleName());
+			}
 			GUIController controller = loader.getController();
 			controller.setBoard(board);
 			controller.setInputHandler(input);
@@ -131,6 +139,20 @@ public class Breakout extends Application {
 		boolean result = def;
 		if (params.containsKey(name)) {
 			result = Boolean.parseBoolean(params.get(name));
+		}
+		return result;
+	}
+
+	/**
+	 * Gets a String from a parameter string.
+	 * @param params The parameter map to use.
+	 * @param name The name of the parameter.
+	 * @param def The default value.
+	 * @return The parameter value.
+	 */private String getStringFromParam(Map<String, String> params, String name, String def) {
+		String result = def;
+		if (params.containsKey(name)) {
+			result = params.get(name);
 		}
 		return result;
 	}

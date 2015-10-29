@@ -43,7 +43,7 @@ public class GUIController {
 
 		Canvas cv = new Canvas(width, height);
 		this.borderPane.setCenter(cv);
-		this.context = cv.getGraphicsContext2D();
+		//this.context = cv.getGraphicsContext2D();
 		this.updateScoreTable();
 
 		GUIController.context = cv.getGraphicsContext2D();
@@ -109,6 +109,11 @@ public class GUIController {
 
 				if (!board.isRunning() && !board.isPaused()) {
 					createOverlay(gc, "Score: " + board.getScore());
+
+					//TODO: Insert score, how to get name?
+					//Update score table
+					updateScoreTable();
+
 					//Stop the AnimationTimer.
 					this.stop();
 				}
