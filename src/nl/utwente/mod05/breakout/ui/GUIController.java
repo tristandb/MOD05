@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -19,12 +20,16 @@ import nl.utwente.mod05.breakout.model.ScoreList;
 import nl.utwente.mod05.breakout.model.items.Ball;
 import nl.utwente.mod05.breakout.model.items.Item;
 
+import java.io.File;
 import java.util.List;
 
 /**
  * Controller class for the GUI. This class handles all user input and output.
  */
 public class GUIController {
+	public static final int CAMERA_WIDTH = 200;
+	public static final int CAMERA_HEIGHT = 150;
+
 	@FXML
 	private BorderPane borderPane;
 	@FXML
@@ -36,6 +41,7 @@ public class GUIController {
 
 	private Board board;
 	private InputHandler inputHandler;
+	private String videoLocation = null;
 	public static GraphicsContext context;
 
 	/**
@@ -79,6 +85,7 @@ public class GUIController {
 			long oldTime = System.nanoTime();
 
 			public synchronized void handle(long currentTime) {
+				drawCamera();
 				//Clear the canvas for a new frame.
 				gc.clearRect(0, 0, board.getWidth(), board.getHeight());
 				//Calculate new frame values.
@@ -226,5 +233,23 @@ public class GUIController {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public void setVideo(String location) {
+		if ((new File(location)).isFile()) {
+			this.videoLocation = location;
+		} else {
+			if (Breakout.DEBUG) {
+				System.err.println("Can not read camera stream for viewing.");
+			}
+		}
+	}
+
+	public void drawCamera() {
+		if (this.videoLocation != null) {
+			GraphicsContext gc = this.cameraCanvas.getGraphicsContext2D();
+			gc.clearRect(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+			gc.drawImage(new Image(this.videoLocation), 0, 0);
+		}
 	}
 }

@@ -34,12 +34,6 @@ public class BallTest {
 
 	@Test
 	public void testIntersects() throws Exception {
-		Ball ball = createBall(50, 50);
-		Block block = new Block(70, 50, 40, 20, "#000000", 0, 0);
-
-		ball.setHeading(0); //Right
-		Ball.Tuple<Ball.Edge, Ball.Point> hit = ball.intersects(71,50,block);
-
 	}
 
 	@Test

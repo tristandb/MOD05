@@ -168,7 +168,6 @@ public class Ball extends Item {
 					}
 
 					if (intersections.size() > 1) {
-						//TODO: Fix double hits (left and right/bottom and top).
 						if (intersections.containsKey(Edge.BOTTOM)) {
 							Point t1 = intersections.get(Edge.BOTTOM);
 							if (intersections.containsKey(Edge.LEFT) && !block.hasRight()) {

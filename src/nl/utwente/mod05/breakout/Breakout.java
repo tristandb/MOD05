@@ -76,11 +76,13 @@ public class Breakout extends Application {
 			} else {
 				input = new MouseInputHandler(width, scene);
 			}
-
 			if (Breakout.DEBUG) {
 				System.out.println("Using input: " + input.getClass().getSimpleName());
 			}
 			GUIController controller = loader.getController();
+			if (params.containsKey("name")) {
+				controller.setName(params.get("name"));
+			}
 			controller.setBoard(board);
 			controller.setInputHandler(input);
 			controller.createGUI();
@@ -94,6 +96,11 @@ public class Breakout extends Application {
 						}
 				);
 			}
+
+			if (getBoolFromParam(params, "enablecameraview", false)) {
+				controller.setVideo(getStringFromParam(params, "cameraview", null));
+			}
+
 			if (getBoolFromParam(params, "fullscreen", false)) {
 				primaryStage.setFullScreen(true);
 			} else {

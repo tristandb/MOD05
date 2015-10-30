@@ -8,4 +8,7 @@ used.
 * `width=[%width%]`: Gamefield with, default 800
 * `height=[%height%]`: Gamefield height, default 600
 * `fullscreen=[true]`: if set to true, the game will run fullscreen.
+* `name=[%name%]`: The name to use for the highscores.
+* `cameraview=[%location%]`: The location of the camera view, when not present or location does 
+not exist, it wont draw any image.
  
