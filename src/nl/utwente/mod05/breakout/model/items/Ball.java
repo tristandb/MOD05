@@ -4,9 +4,11 @@ import javafx.scene.paint.Color;
 import nl.utwente.mod05.breakout.Breakout;
 import nl.utwente.mod05.breakout.ui.GUIController;
 
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.List;
 import java.util.HashSet;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Class representing a ball
@@ -14,7 +16,7 @@ import java.util.HashSet;
 public class Ball extends Item {
 	public static final double DEFAULT_RADIUS = 10;
 	public static final double DEFAULT_HEADING = 90;
-	public static final double DEFAULT_VELOCITY = 5; //Pixels per frame
+	public static final double DEFAULT_VELOCITY = 3; //Pixels per frame
 	public static final double SPEED_MULTIPLIER = 1.3;
 	public static final HashSet<Integer> MULTIPLY_ON_HIT = new HashSet<>(Arrays.asList(new
 			Integer[] {4, 12}));
@@ -113,11 +115,14 @@ public class Ball extends Item {
 				&& !(this.ballGoesDown() && this.ballGoesLeft() && block.hasTop() && block.hasRight())
 				&& !(this.ballGoesDown() && this.ballGoesRight() && block.hasTop() && block.hasLeft())
 				) {
-			for (int i = 0; i < (int) (linelength * 10); i += Math.max((int) (linelength / 10), 1)) {
+			for (int i = 0; i < (int) linelength; i += Math.max((int) (linelength /
+					10), 1)) {
 				HashMap<Edge, Point> intersections = new HashMap<>();
 				tx = Math.max(0, this.posx + i * (dx / 10));
 				ty = Math.max(0, this.posy + i * (dy / 10));
-				relativeX = (tx + this.radius) - block.getX();
+				//tx = Math.max(0, newX - i * (dx / 10));
+				//ty = Math.max(0, newY - i * (dy / 10));
+				relativeX = block.getX() - (tx + this.radius);
 				relativeY = block.getY() - (ty + this.radius);
 				w = block.getWidth();
 				h = block.getHeight();
@@ -162,38 +167,55 @@ public class Ball extends Item {
 						intersections.put(Edge.LEFT, intersect);
 					}
 
-					if (intersections.size() >= 1) {
+					if (intersections.size() > 1) {
+						//TODO: Fix double hits (left and right/bottom and top).
 						if (intersections.containsKey(Edge.BOTTOM)) {
 							Point t1 = intersections.get(Edge.BOTTOM);
-							if (intersections.containsKey(Edge.LEFT)) {
+							if (intersections.containsKey(Edge.LEFT) && !block.hasRight()) {
 								Point t2 = intersections.get(Edge.LEFT);
 								if (t1.x - block.getX() < block.getY() + block.getHeight() - t2.y) {
 									return new Tuple<>(Edge.LEFT, t2);
 								}
-							} else if (intersections.containsKey(Edge.RIGHT)) {
+							} else if (intersections.containsKey(Edge.RIGHT) && !block.hasLeft()) {
 								Point t2 = intersections.get(Edge.RIGHT);
 								if ((block.getX() + block.getWidth() - t1.x)
 										< block.getY() + block.getHeight() - t2.y) {
 									return new Tuple<>(Edge.RIGHT, t2);
 								}
 							}
+							if (this.ballGoesDown()) {
+								return  new Tuple<>(Edge.TOP, t1);
+							}
 							return new Tuple<>(Edge.BOTTOM, t1);
 						} else if (intersections.containsKey(Edge.TOP)) {
 							Point t1 = intersections.get(Edge.TOP);
-							if (intersections.containsKey(Edge.LEFT)) {
+							if (intersections.containsKey(Edge.LEFT) && !block.hasRight()) {
 								Point t2 = intersections.get(Edge.LEFT);
 								if (t1.x - block.getX() < t2.y - block.getHeight()) {
 									return new Tuple<>(Edge.LEFT, t2);
 								}
-							} else if (intersections.containsKey(Edge.RIGHT)) {
+							} else if (intersections.containsKey(Edge.RIGHT) && !block.hasLeft()) {
 								Point t2 = intersections.get(Edge.RIGHT);
 								if ((block.getX() + block.getWidth() - t1.x)
 										< t2.y - block.getHeight()) {
 									return new Tuple<>(Edge.RIGHT, t2);
 								}
 							}
-							return new Tuple<>(Edge.TOP, intersections.get(Edge.TOP));
+							if (this.ballGoesUp()) {
+								return  new Tuple<>(Edge.BOTTOM, t1);
+							}
+							return new Tuple<>(Edge.TOP, t1);
+						} else {
+							if (this.ballGoesLeft()) {
+								return new Tuple<>(Edge.RIGHT, intersections.get(Edge.RIGHT));
+							} else {
+								return new Tuple<>(Edge.LEFT, intersections.get(Edge.LEFT));
+							}
 						}
+					} else if (intersections.size() == 1) {
+						List<Edge> t = new ArrayList<>(intersections.keySet());
+						Edge e = t.get(0);
+						return new Tuple<>(e, intersections.get(e));
 					}
 				}
 			}
@@ -238,7 +260,7 @@ public class Ball extends Item {
 	}
 
 	public boolean ballGoesRight() {
-		return this.heading > 270 && this.heading < 90;
+		return this.heading > 270 || this.heading < 90;
 	}
 
 	/**
@@ -264,8 +286,8 @@ public class Ball extends Item {
 	 */
 	public boolean determinePaddleHit(Paddle paddle) {
 		return this.posy + (this.radius * 2) > paddle.getY()
-				&& (this.posx + this.radius) > paddle.getX()
-					&& (this.posx - this.radius) < (paddle.getX() + paddle.getWidth());
+				&& (this.posx + 2 * this.radius) > paddle.getX()
+					&& (this.posx) < (paddle.getX() + paddle.getWidth());
 	}
 
 	/**

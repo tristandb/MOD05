@@ -23,7 +23,7 @@ public class DatabaseConnector {
 
     /**
      * Singleton
-     * @return
+     * @return The instance of the Database.
      */
     public static synchronized DatabaseConnector getInstance() {
         if (instance == null) {
@@ -37,44 +37,47 @@ public class DatabaseConnector {
 
     /**
      * Connect to the database
-     * @return
+     * @return connection
      */
     public Connection connectDatabase() {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             connection = DriverManager.getConnection(url, user, password);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (ClassNotFoundException | SQLException e) {
+			if (Breakout.DEBUG) {
+				e.printStackTrace();
+			}
         }
         return connection;
     }
 
     /**
      * Get a list of 20 highscores
-     * @return
+     * @return List with highscores
      */
     public List<Map<String, Object>> getHighscores() {
         if(connection == null){
             DatabaseConnector.getInstance().connectDatabase();
         }
-        String highScoreStatement = "SELECT * FROM highscores ORDER BY "+SCORE+" DESC LIMIT 20";
-        List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
-        try {
-            PreparedStatement statement = connection.prepareStatement(highScoreStatement);
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                Map<String, Object> resultMap = new HashMap<String, Object>();
-                resultMap.put(NAME, resultSet.getString(NAME));
-                resultMap.put(SCORE, resultSet.getInt(SCORE));
-                resultList.add(resultMap);
-            }
-        } catch (SQLException e) {
-            if (Breakout.DEBUG) {
-				e.printStackTrace();
+
+		List<Map<String, Object>> resultList = new ArrayList<>();
+		if (connection != null) {
+			String highScoreStatement = "SELECT * FROM highscores ORDER BY "+SCORE+" DESC LIMIT 20";
+			try {
+				PreparedStatement statement = connection.prepareStatement(highScoreStatement);
+				ResultSet resultSet = statement.executeQuery();
+				while (resultSet.next()) {
+					Map<String, Object> resultMap = new HashMap<>();
+					resultMap.put(NAME, resultSet.getString(NAME));
+					resultMap.put(SCORE, resultSet.getInt(SCORE));
+					resultList.add(resultMap);
+				}
+			} catch (SQLException e) {
+				if (Breakout.DEBUG) {
+					e.printStackTrace();
+				}
 			}
-        }
+		}
         return resultList;
     }
 
@@ -88,16 +91,19 @@ public class DatabaseConnector {
         if(connection == null){
             DatabaseConnector.getInstance().connectDatabase();
         }
-        String addScoreStatement = "INSERT INTO highscores ("+NAME+", "+SCORE+") VALUES (?, ?)";
-        try {
-            PreparedStatement statement = connection.prepareStatement(addScoreStatement);
-            statement.setString(1, name);
-            statement.setInt(2, score);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-			if (Breakout.DEBUG) {
-				e.printStackTrace();
+
+		if (connection != null) {
+			String addScoreStatement = "INSERT INTO highscores ("+NAME+", "+SCORE+") VALUES (?, ?)";
+			try {
+				PreparedStatement statement = connection.prepareStatement(addScoreStatement);
+				statement.setString(1, name);
+				statement.setInt(2, score);
+				statement.executeUpdate();
+			} catch (SQLException e) {
+				if (Breakout.DEBUG) {
+					e.printStackTrace();
+				}
 			}
-        }
+		}
     }
 }

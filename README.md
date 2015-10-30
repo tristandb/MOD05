@@ -1,6 +1,6 @@
 #Augmented Breakout
 
-##Java program command line arguments
+##Java programme command line arguments
 * `debug=[true]`: if set to true, debug output will be printed.
 * `input=[camera|cheat]`: 'camera' for Camera input, 'cheat' for Cheat input, otherwise Mouse is 
 used.

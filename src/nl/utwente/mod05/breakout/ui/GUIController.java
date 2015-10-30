@@ -1,15 +1,17 @@
 package nl.utwente.mod05.breakout.ui;
 
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import nl.utwente.mod05.breakout.Breakout;
+import nl.utwente.mod05.breakout.helper.DatabaseConnector;
 import nl.utwente.mod05.breakout.input.InputHandler;
 import nl.utwente.mod05.breakout.model.Board;
 import nl.utwente.mod05.breakout.model.Score;
@@ -29,6 +31,8 @@ public class GUIController {
 	private TableView<Score> scores;
 	@FXML
 	private Canvas cameraCanvas;
+
+	private String name = null;
 
 	private Board board;
 	private InputHandler inputHandler;
@@ -53,12 +57,13 @@ public class GUIController {
 	 * Updates the scoretable
 	 */
 	@FXML
-	public void updateScoreTable(){
+	public void updateScoreTable() {
 		// Remove all elements
 		scores.getItems().removeAll(scores.getItems());
 		// Add new elements
 		scores.setItems((new ScoreList()).getScoreList());
 	}
+
 	/**
 	 * Starts the game.
 	 */
@@ -72,6 +77,7 @@ public class GUIController {
 		//Animation timer, should run about 60 times a second.
 		new AnimationTimer() {
 			long oldTime = System.nanoTime();
+
 			public synchronized void handle(long currentTime) {
 				//Clear the canvas for a new frame.
 				gc.clearRect(0, 0, board.getWidth(), board.getHeight());
@@ -82,7 +88,7 @@ public class GUIController {
 				int input = inputHandler.getInput();
 				if (input == InputHandler.ERROR_STATE) {
 					board.pause();
-				} else if (board.isPaused()){
+				} else if (board.isPaused()) {
 					board.unpause();
 				}
 
@@ -109,13 +115,11 @@ public class GUIController {
 
 				if (!board.isRunning() && !board.isPaused()) {
 					createOverlay(gc, "Score: " + board.getScore());
-
-					//TODO: Insert score, how to get name?
-					//Update score table
-					updateScoreTable();
-
 					//Stop the AnimationTimer.
 					this.stop();
+
+					gameOver(board.getScore());
+
 				}
 
 				if (board.isPaused()) {
@@ -127,6 +131,8 @@ public class GUIController {
 					showDebug(gc, currentTime, oldTime);
 				}
 
+				gc.setStroke(Color.WHITE);
+				gc.strokeRect(0, 0, board.getWidth(), board.getHeight());
 				//Time values used for FPS.
 				oldTime = currentTime;
 			}
@@ -182,5 +188,43 @@ public class GUIController {
 	 */
 	public void setInputHandler(InputHandler ih) {
 		this.inputHandler = ih;
+	}
+
+	public void gameOver(int score) {
+		Platform.runLater(
+				() -> {
+					if (name == null) {
+
+						while (getName() == null || getName().trim().isEmpty()) {
+							Dialog<ButtonType> dialog = new Dialog<>();
+							dialog.getDialogPane().setHeaderText("Insert name");
+							TextField tf = new TextField();
+							dialog.getDialogPane().setContent(tf);
+							ButtonType bt = new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE);
+							dialog.getDialogPane().getButtonTypes().add(bt);
+
+							dialog.showAndWait().ifPresent(result -> {
+								if (dialog.getDialogPane().getContent() instanceof TextField) {
+									name = ((TextField) dialog.getDialogPane()
+											.getContent()).getCharacters().toString();
+								}
+							});
+						}
+					}
+
+					DatabaseConnector dbc = DatabaseConnector.getInstance();
+					if (dbc != null) {
+						dbc.addScore(name, score);
+						this.updateScoreTable();
+					}
+				});
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 }

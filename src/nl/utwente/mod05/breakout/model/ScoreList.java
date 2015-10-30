@@ -18,10 +18,13 @@ public class ScoreList {
      * Constructor, retreive data from the server
      */
     public ScoreList(){
-        List<Map<String, Object>> highscores = DatabaseConnector.getInstance().getHighscores();
-        for(Map<String, Object> highscore: highscores) {
-            scoreObservableList.add(new Score(highscore.get("name").toString(), (Integer) highscore.get("score")));
-        }
+        DatabaseConnector db = DatabaseConnector.getInstance();
+		if (db != null) {
+			List<Map<String, Object>> highscores = db.getHighscores();
+			for(Map<String, Object> highscore: highscores) {
+				scoreObservableList.add(new Score(highscore.get("name").toString(), (Integer) highscore.get("score")));
+			}
+		}
     }
 
     /**

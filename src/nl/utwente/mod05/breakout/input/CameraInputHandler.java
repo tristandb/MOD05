@@ -9,8 +9,8 @@ import java.nio.ByteBuffer;
 
 public class CameraInputHandler extends InputHandler {
 	public static final String DEFAULT_INPUT_NAME = "stdin";
-	public static final int INPUT_BITS = 10;
-	public static final int INPUT_MAX_WIDTH = 1024;
+	public static final int INPUT_BITS = 8;
+	public static final int INPUT_MAX_WIDTH = 254;
 	private ByteBuffer buffer;
 	private InputStream stream;
 	public CameraInputHandler(int width, String pipeName) {

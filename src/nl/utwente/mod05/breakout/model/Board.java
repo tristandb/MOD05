@@ -1,13 +1,11 @@
 package nl.utwente.mod05.breakout.model;
 
-import javafx.scene.paint.Color;
 import nl.utwente.mod05.breakout.Breakout;
 import nl.utwente.mod05.breakout.input.InputHandler;
 import nl.utwente.mod05.breakout.model.items.Ball;
 import nl.utwente.mod05.breakout.model.items.Block;
 import nl.utwente.mod05.breakout.model.items.Item;
 import nl.utwente.mod05.breakout.model.items.Paddle;
-import nl.utwente.mod05.breakout.ui.GUIController;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -27,6 +25,7 @@ public class Board {
 	private int width;
 	private int height;
 	private int score;
+	private double prevX, prevY;
 	private Paddle paddle;
 	private Ball.Point lastHit;
 
@@ -258,11 +257,9 @@ public class Board {
 				for (Block b : tblocks) {
 					if (b != null) {
 						//hitOn variable representing the edge of the block where the ball hit the block
-						Ball.Tuple<Ball.Edge, Ball.Point> t = this.ball.intersects(newX, newY, b);
-						GUIController.context.setFill(Color.RED);
-						GUIController.context.strokeRect(b.getX(), b.getY(), b.getWidth(), b.getHeight());
-						Ball.Edge hitOn = t.first;
-						Ball.Point hitOnPoint =  t.second;
+						Ball.Tuple<Ball.Edge, Ball.Point> intersect = this.ball.intersects(newX, newY, b);
+						Ball.Edge hitOn = intersect.first;
+						Ball.Point hitOnPoint =  intersect.second;
 						if (hitOn != Ball.Edge.NONE) {
 							if (Breakout.DEBUG) {
 								System.out.println(hitOn + " width heading " + this.ball.getHeading());
@@ -286,8 +283,20 @@ public class Board {
 							//Calculate new ball heading
 							if (hitOn.equals(Ball.Edge.TOP) || hitOn.equals(Ball.Edge.BOTTOM)) {
 								heading = 360 - this.ball.getHeading();
+								if (hitOn.equals(Ball.Edge.TOP) && heading < 180) {
+									heading += 180;
+								}
+								if (hitOn.equals(Ball.Edge.BOTTOM) && heading > 180) {
+									heading -= 180;
+								}
 							} else {
 								heading = 180 - this.ball.getHeading();
+								if (hitOn.equals(Ball.Edge.LEFT) && heading < 270 && heading > 90) {
+									heading -= 180;
+								} else if (hitOn.equals(Ball.Edge.RIGHT) && heading > 270 &&
+										heading < 90) {
+									heading += 180;
+								}
 							}
 
 							//Remove block from the list.
@@ -305,8 +314,10 @@ public class Board {
 							}
 							this.blocks.remove(b);
 
-							newX = this.ball.getX();
-							newY = this.ball.getY();
+							/*newX = this.ball.getX();
+							newY = this.ball.getY();*/
+							newX = prevX;
+							newY = prevY;
 							this.lastHit = hitOnPoint;
 							//Only do 1 hit per frame.
 							break;
@@ -318,6 +329,8 @@ public class Board {
 			if (this.blocks.size() == 0) {
 				this.running = false;
 			}
+			prevX = this.ball.getX();
+			prevY = this.ball.getY();
 			this.ball.setPosition(newX, newY);
 			this.ball.setHeading(heading % 360);
 
