@@ -13,7 +13,7 @@ public class DatabaseConnector {
 	public static final int LOGIN_TIMEOUT = 5;
     private static volatile DatabaseConnector instance = null;
     private static Connection connection = null;
-    private static final String url = "jdbc:mysql://natsirt.nl/ut_breakout";
+    private static final String url = "jdbc:mysql://91.121.112.183/ut_breakout";
     private static final String user = "ut_breakout";
     private static final String password = "XsJxN39fj6jYuBhw";
     private static final String NAME = "name";
