@@ -1,9 +1,5 @@
 package nl.utwente.mod05.breakout.model.items;
 
-import javafx.scene.paint.Color;
-import nl.utwente.mod05.breakout.Breakout;
-import nl.utwente.mod05.breakout.ui.GUIController;
-
 import java.util.List;
 import java.util.HashSet;
 import java.util.Arrays;
@@ -140,12 +136,6 @@ public class Ball extends Item {
 						(block.getX() + block.getWidth()) > tx &&
 						block.getY() < ty + (2 * this.radius) &&
 						block.getY() + block.getHeight() > ty) {
-
-					if (Breakout.DEBUG) {
-						GUIController.context.setStroke(Color.RED);
-						GUIController.context.strokeOval(tx - this.radius, ty - this.radius,
-								this.radius * 2, this.radius * 2);
-					}
 
 					Point intersect = calculateIntersection(a, b, tx, ty);
 					if (this.ballGoesUp() && !intersect.equals(invalid)) {

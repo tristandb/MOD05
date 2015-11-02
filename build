@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+mkdir ./tmp
+
+cp ./prepare_pi ./tmp/
+cp ./picasender/spyinterface.py ./tmp/
+cp ./target/AugmentedBreakout-1.0-SNAPSHOT-jar-with-dependencies.jar ./tmp/
+cp ./run ./tmp/
+cd ./tmp
+tar -pczf ./Breakout.tar.gz ./*
+mv ./Breakout.tar.gz ../
+cd ..
+rm -r ./tmp
