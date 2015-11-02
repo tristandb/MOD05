@@ -47,7 +47,7 @@ public class Breakout extends Application {
 
 		//Loads the correct FXML file.
 		FXMLLoader loader = new FXMLLoader();
-		loader.setLocation(GUIController.class.getResource("views/GUI.fxml"));
+		loader.setLocation(GUIController.class.getClassLoader().getResource("GUI.fxml"));
 		BorderPane layout = null;
 
 		try {

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--<?import java.lang.*?>-->
+
+<?import javafx.collections.FXCollections?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<BorderPane fx:id="borderPane" maxHeight="1.7976931348623157E308"
+            maxWidth="1.7976931348623157E308" minHeight="600" minWidth="800"
+            style="-fx-background-color: #000;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="nl.utwente.mod05.breakout.ui.GUIController">
+    <right>
+        <VBox prefWidth="200.0" BorderPane.alignment="CENTER">
+            <children>
+                <Canvas fx:id="cameraCanvas" height="200.0" width="200.0"/>
+                <TableView fx:id="scores" prefHeight="400.0" prefWidth="200.0" style="-fx-background-color: #000;">
+                    <columns>
+                        <TableColumn prefWidth="121.0" text="Name">
+                            <cellValueFactory>
+                                <PropertyValueFactory property="name"/>
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn prefWidth="78.0" text="Score">
+                            <cellValueFactory>
+                                <PropertyValueFactory property="score"/>
+                            </cellValueFactory>
+                        </TableColumn>
+                    </columns>
+                    <items>
+                        <FXCollections fx:factory="observableArrayList">
+                        </FXCollections>
+                    </items>
+                </TableView>
+            </children>
+        </VBox>
+    </right>
+</BorderPane>
