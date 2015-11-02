@@ -17,10 +17,11 @@ import nl.utwente.mod05.breakout.input.InputHandler;
 import nl.utwente.mod05.breakout.model.Board;
 import nl.utwente.mod05.breakout.model.Score;
 import nl.utwente.mod05.breakout.model.ScoreList;
-import nl.utwente.mod05.breakout.model.items.Ball;
 import nl.utwente.mod05.breakout.model.items.Item;
 
-import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -38,24 +39,23 @@ public class GUIController {
 	private Canvas cameraCanvas;
 
 	private String name = null;
+	private boolean getHighscores = false;
 
 	private Board board;
 	private InputHandler inputHandler;
-	private String videoLocation = null;
+	private InputStream videoStream = null;
 	public static GraphicsContext context;
 
 	/**
 	 * Creates the GUI, does not draw Items on the canvas.
 	 */
 	public void createGUI() {
-		final int width = this.board.getWidth();
-		final int height = this.board.getHeight();
-
-		Canvas cv = new Canvas(width, height);
+		Canvas cv = new Canvas(this.board.getWidth(), this.board.getHeight());
 		this.borderPane.setCenter(cv);
-		//this.context = cv.getGraphicsContext2D();
-		this.updateScoreTable();
 
+		if (this.getHighscores) {
+			this.updateScoreTable();
+		}
 		GUIController.context = cv.getGraphicsContext2D();
 	}
 
@@ -113,11 +113,6 @@ public class GUIController {
 						gc.strokeRect(item.getX(), item.getY(), item.getWidth(), item.getHeight());
 					}
 				}
-				if (board.lastHitPoint() != null) {
-					gc.setStroke(Color.RED);
-					gc.strokeOval(board.lastHitPoint().x, board.lastHitPoint().y, Ball
-							.DEFAULT_RADIUS * 2, Ball.DEFAULT_RADIUS * 2);
-				}
 
 
 				if (!board.isRunning() && !board.isPaused()) {
@@ -138,8 +133,6 @@ public class GUIController {
 					showDebug(gc, currentTime, oldTime);
 				}
 
-				gc.setStroke(Color.WHITE);
-				gc.strokeRect(0, 0, board.getWidth(), board.getHeight());
 				//Time values used for FPS.
 				oldTime = currentTime;
 			}
@@ -198,33 +191,36 @@ public class GUIController {
 	}
 
 	public void gameOver(int score) {
-		Platform.runLater(
-				() -> {
-					if (name == null) {
+		if (this.getHighscores) {
+			Platform.runLater(
+					() -> {
+						if (name == null) {
 
-						while (getName() == null || getName().trim().isEmpty()) {
-							Dialog<ButtonType> dialog = new Dialog<>();
-							dialog.getDialogPane().setHeaderText("Insert name");
-							TextField tf = new TextField();
-							dialog.getDialogPane().setContent(tf);
-							ButtonType bt = new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE);
-							dialog.getDialogPane().getButtonTypes().add(bt);
+							while (getName() == null || getName().trim().isEmpty()) {
+								Dialog<ButtonType> dialog = new Dialog<>();
+								dialog.getDialogPane().setHeaderText("Insert name");
+								TextField tf = new TextField();
+								dialog.getDialogPane().setContent(tf);
+								ButtonType bt = new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE);
+								dialog.getDialogPane().getButtonTypes().add(bt);
 
-							dialog.showAndWait().ifPresent(result -> {
-								if (dialog.getDialogPane().getContent() instanceof TextField) {
-									name = ((TextField) dialog.getDialogPane()
-											.getContent()).getCharacters().toString();
-								}
-							});
+								dialog.showAndWait().ifPresent(result -> {
+									if (dialog.getDialogPane().getContent() instanceof TextField) {
+										name = ((TextField) dialog.getDialogPane()
+												.getContent()).getCharacters().toString();
+									}
+								});
+							}
 						}
-					}
 
-					DatabaseConnector dbc = DatabaseConnector.getInstance();
-					if (dbc != null) {
-						dbc.addScore(name, score);
-						this.updateScoreTable();
-					}
-				});
+						DatabaseConnector dbc = DatabaseConnector.getInstance();
+						if (dbc != null) {
+							dbc.addScore(name, score);
+							this.updateScoreTable();
+						}
+					});
+
+		}
 	}
 
 	public String getName() {
@@ -236,9 +232,9 @@ public class GUIController {
 	}
 
 	public void setVideo(String location) {
-		if ((new File(location)).isFile()) {
-			this.videoLocation = location;
-		} else {
+		try {
+			this.videoStream = new FileInputStream(location);
+		} catch (FileNotFoundException e) {
 			if (Breakout.DEBUG) {
 				System.err.println("Can not read camera stream for viewing.");
 			}
@@ -246,10 +242,14 @@ public class GUIController {
 	}
 
 	public void drawCamera() {
-		if (this.videoLocation != null) {
+		if (this.videoStream != null) {
 			GraphicsContext gc = this.cameraCanvas.getGraphicsContext2D();
 			gc.clearRect(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
-			gc.drawImage(new Image(this.videoLocation), 0, 0);
+			gc.drawImage(new Image(this.videoStream), 0, 0);
 		}
+	}
+
+	public void setGetHighscores(boolean h) {
+		this.getHighscores = h;
 	}
 }

@@ -21,6 +21,7 @@ public class Ball extends Item {
 	public static final HashSet<Integer> MULTIPLY_ON_HIT = new HashSet<>(Arrays.asList(new
 			Integer[] {4, 12}));
 	public static final String DEFAULT_COLOR = "#A4A4A4";
+	public static final int STEPS_PER_FRAME = 2;
 
 	private double radius;
 	private double velocity;
@@ -116,10 +117,10 @@ public class Ball extends Item {
 				&& !(this.ballGoesDown() && this.ballGoesRight() && block.hasTop() && block.hasLeft())
 				) {
 			for (int i = 0; i < (int) linelength; i += Math.max((int) (linelength /
-					10), 1)) {
+					STEPS_PER_FRAME), 1)) {
 				HashMap<Edge, Point> intersections = new HashMap<>();
-				tx = Math.max(0, this.posx + i * (dx / 10));
-				ty = Math.max(0, this.posy + i * (dy / 10));
+				tx = Math.max(0, this.posx + i * (dx / STEPS_PER_FRAME));
+				ty = Math.max(0, this.posy + i * (dy / STEPS_PER_FRAME));
 				//tx = Math.max(0, newX - i * (dx / 10));
 				//ty = Math.max(0, newY - i * (dy / 10));
 				relativeX = block.getX() - (tx + this.radius);

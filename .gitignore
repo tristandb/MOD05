@@ -112,6 +112,7 @@ $RECYCLE.BIN/
 *.lnk
 ### Eclipse template
 *.pydevproject
+/target
 .metadata
 .gradle
 bin/

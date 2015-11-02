@@ -55,6 +55,7 @@ public class Breakout extends Application {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
 		if (layout != null) {
 			Scene scene = new Scene(layout);
 
@@ -79,10 +80,10 @@ public class Breakout extends Application {
 			if (Breakout.DEBUG) {
 				System.out.println("Using input: " + input.getClass().getSimpleName());
 			}
+
 			GUIController controller = loader.getController();
-			if (params.containsKey("name")) {
-				controller.setName(params.get("name"));
-			}
+			controller.setName(getStringFromParam(params, "name", null));
+			controller.setGetHighscores(getBoolFromParam(params, "gethighscores", true));
 			controller.setBoard(board);
 			controller.setInputHandler(input);
 			controller.createGUI();

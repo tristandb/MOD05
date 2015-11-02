@@ -35,7 +35,7 @@ public class CheatInputHandler extends InputHandler {
 	public synchronized int getInput() {
 		double ballX = this.board.getBall().getX() + this.board.getBall().getRadius();
 		this.position = (int) ballX
-				+ ((new Random()).nextInt((int) this.board.getPaddle().getWidth() / 2)
+				+ ((new Random()).nextInt((int) this.board.getPaddle().getWidth())
 				* (new Random()).nextInt(2) % 2 == 1 ? -1 : 1);
 		return this.position;
 	}

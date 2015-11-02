@@ -9,6 +9,10 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
+        <packageName>nl.utwente.mod05.breakout</packageName>
+        <mainClass>${packageName}.Breakout</mainClass>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
         <!-- Mysql version -->
         <dropwizard.version>5.1.6</dropwizard.version>
     </properties>
@@ -39,6 +43,18 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>nl.utwente.mod05.breakout.Breakout</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
             </plugin>
         </plugins>

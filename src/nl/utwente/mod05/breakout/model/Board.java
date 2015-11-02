@@ -27,7 +27,6 @@ public class Board {
 	private int score;
 	private double prevX, prevY;
 	private Paddle paddle;
-	private Ball.Point lastHit;
 
 	private List<Block> blocks;
 	private Ball ball;
@@ -68,6 +67,9 @@ public class Board {
 				Paddle.DEFAULT_COLOR
 		);
 
+		if (this.blocks != null) {
+			this.blocks.clear();
+		}
 		//Instantiate Block objects.
 		int blockWidth = width / BLOCKS_PER_ROW;
 		int id = 0;
@@ -247,8 +249,10 @@ public class Board {
 			}
 
 			//Make sure the new coordinates are actually on the game field.
-			newX = newX < 0 ? 1 : newX > this.width ? this.width - 2 * this.ball.getRadius() : newX;
-			newY = newY < 0 ? 1 : newY > this.height ? this.height - 2 * this.ball.getRadius() :
+			newX = newX < 0 ? 1 : newX > this.width - 2 * this.ball.getRadius() ?
+					this.width - 2 * this.ball.getRadius() : newX;
+			newY = newY < 0 ? 1 : newY > this.height ?
+					this.height - 2 * this.ball.getRadius() :
 					newY;
 
 			//Check if the ball hit any blocks. But only if it is possible a block might be hit.
@@ -259,7 +263,6 @@ public class Board {
 						//hitOn variable representing the edge of the block where the ball hit the block
 						Ball.Tuple<Ball.Edge, Ball.Point> intersect = this.ball.intersects(newX, newY, b);
 						Ball.Edge hitOn = intersect.first;
-						Ball.Point hitOnPoint =  intersect.second;
 						if (hitOn != Ball.Edge.NONE) {
 							if (Breakout.DEBUG) {
 								System.out.println(hitOn + " width heading " + this.ball.getHeading());
@@ -314,11 +317,8 @@ public class Board {
 							}
 							this.blocks.remove(b);
 
-							/*newX = this.ball.getX();
-							newY = this.ball.getY();*/
 							newX = prevX;
 							newY = prevY;
-							this.lastHit = hitOnPoint;
 							//Only do 1 hit per frame.
 							break;
 						}
@@ -335,8 +335,5 @@ public class Board {
 			this.ball.setHeading(heading % 360);
 
 		}
-	}
-	public Ball.Point lastHitPoint() {
-		return this.lastHit;
 	}
 }
