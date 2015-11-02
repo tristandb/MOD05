@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
-mkdir ./tmp
+filedate="$(date +%Y%m%d%H%M%S)"
+tmpdir="$(mktemp -d)"
+curdir="$(pwd)"
 
-cp ./prepare_pi ./tmp/
-cp ./picasender/spyinterface.py ./tmp/
-cp ./target/AugmentedBreakout-1.0-SNAPSHOT-jar-with-dependencies.jar ./tmp/
-cp ./run ./tmp/
-cd ./tmp
-tar -pczf ./Breakout.tar.gz ./*
-mv ./Breakout.tar.gz ../
-cd ..
-rm -r ./tmp
+cp ./prepare_pi $tmpdir
+cp ./picasender/spyinterface.py $tmpdir
+cp ./target/AugmentedBreakout-1.0-SNAPSHOT-jar-with-dependencies.jar $tmpdir
+cp ./run $tmpdir
+cd $tmpdir
+tar -pczf "$curdir/Breakout-$filedate.tar.gz"  ./
+
+rm -r $tmpdir
