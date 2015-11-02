@@ -53,6 +53,9 @@ public class GUIController {
 		Canvas cv = new Canvas(this.board.getWidth(), this.board.getHeight());
 		this.borderPane.setCenter(cv);
 
+		if (this.inputHandler != null) {
+			this.inputHandler.handle();
+		}
 		if (this.getHighscores) {
 			this.updateScoreTable();
 		}
@@ -83,7 +86,7 @@ public class GUIController {
 		//Animation timer, should run about 60 times a second.
 		new AnimationTimer() {
 			long oldTime = System.nanoTime();
-
+			int callGc = 0;
 			public synchronized void handle(long currentTime) {
 				drawCamera();
 				//Clear the canvas for a new frame.
@@ -135,6 +138,13 @@ public class GUIController {
 
 				//Time values used for FPS.
 				oldTime = currentTime;
+
+				//Call the garbage collector every 10 seconds.
+				callGc++;
+				if (callGc >= 600) {
+					System.gc();
+					callGc = 0;
+				}
 			}
 		}.start();
 	}
@@ -227,16 +237,18 @@ public class GUIController {
 		return this.name;
 	}
 
-	public void setName(String name) {
+	public void setPlayerName(String name) {
 		this.name = name;
 	}
 
 	public void setVideo(String location) {
-		try {
-			this.videoStream = new FileInputStream(location);
-		} catch (FileNotFoundException e) {
-			if (Breakout.DEBUG) {
-				System.err.println("Can not read camera stream for viewing.");
+		if (location != null) {
+			try {
+				this.videoStream = new FileInputStream(location);
+			} catch (FileNotFoundException e) {
+				if (Breakout.DEBUG) {
+					System.err.println("Can not read camera stream for viewing.");
+				}
 			}
 		}
 	}

@@ -1,5 +1,6 @@
 package nl.utwente.mod05.breakout.input;
 
+import nl.utwente.mod05.breakout.Breakout;
 import nl.utwente.mod05.breakout.model.Board;
 
 import java.util.Random;
@@ -28,7 +29,9 @@ public class CheatInputHandler extends InputHandler {
 	 */
 	@Override
 	public synchronized void handle() {
-
+		if (Breakout.DEBUG) {
+			System.out.println("Using input: " + this.getClass().getSimpleName());
+		}
 	}
 
 	@Override

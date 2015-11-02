@@ -1,7 +1,7 @@
 package nl.utwente.mod05.breakout.input;
 
 import javafx.scene.Scene;
-import javafx.scene.input.KeyCode;
+import nl.utwente.mod05.breakout.Breakout;
 
 /**
  * MouseInputHandler, bases input on coordinates of the cursor.
@@ -25,14 +25,15 @@ public class MouseInputHandler extends InputHandler {
 	 */
 	@Override
 	public synchronized void handle() {
+		if (Breakout.DEBUG) {
+			System.out.println("Using input: " + this.getClass().getSimpleName());
+		}
 		this.scene.setOnMouseMoved(
 				event -> position = (int) (event.getX())
 		);
 
 		this.scene.setOnKeyTyped(
-				event -> {
-					position = InputHandler.ERROR_STATE;
-				}
+				event -> position = InputHandler.ERROR_STATE
 		);
 	}
 }

@@ -60,5 +60,9 @@ public class CameraInputHandler extends InputHandler {
 		return this.position;
 	}
 
-	public synchronized void handle() {}
+	public synchronized void handle() {
+		if (Breakout.DEBUG) {
+			System.out.println("Using input: " + this.getClass().getSimpleName());
+		}
+	}
 }

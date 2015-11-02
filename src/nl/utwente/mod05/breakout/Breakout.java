@@ -71,23 +71,20 @@ public class Breakout extends Application {
 				} else if (params.get("input").equals("cheat")) {
 					input = new CheatInputHandler(width, board);
 				}
-				if (input == null) {
-					input = new MouseInputHandler(width, scene);
-				}
-			} else {
-				input = new MouseInputHandler(width, scene);
 			}
-			if (Breakout.DEBUG) {
-				System.out.println("Using input: " + input.getClass().getSimpleName());
+			if (input == null) {
+				input = new MouseInputHandler(width, scene);
 			}
 
 			GUIController controller = loader.getController();
-			controller.setName(getStringFromParam(params, "name", null));
+			controller.setPlayerName(getStringFromParam(params, "name", null));
 			controller.setGetHighscores(getBoolFromParam(params, "gethighscores", true));
 			controller.setBoard(board);
 			controller.setInputHandler(input);
+			controller.setVideo(getStringFromParam(params, "cameraview", null));
 			controller.createGUI();
-			input.handle();
+
+
 			if (input instanceof MouseInputHandler || input instanceof CheatInputHandler) {
 				scene.setOnMouseClicked(
 						event -> {
@@ -96,10 +93,6 @@ public class Breakout extends Application {
 							}
 						}
 				);
-			}
-
-			if (getBoolFromParam(params, "enablecameraview", false)) {
-				controller.setVideo(getStringFromParam(params, "cameraview", null));
 			}
 
 			if (getBoolFromParam(params, "fullscreen", false)) {
