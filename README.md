@@ -1,5 +1,11 @@
 #Augmented Breakout
 
+##Installation
+Before running Augmented Breakout, the Raspberry Pi has to be set up to get the ultimate playing 
+experience. To set up the Pi, use the `prepare_pi.sh` script. This will set the GPU memory to 
+512MB, set up a desktop environment-less X11 configuration and makes sure /tmp is mounted as 
+tmpfs.
+
 ##Java programme command line arguments
 * `debug=[true]`: if set to true, debug output will be printed.
 * `input=[camera|cheat]`: 'camera' for Camera input, 'cheat' for Cheat input, otherwise Mouse is 
