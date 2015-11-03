@@ -47,7 +47,7 @@ public class Breakout extends Application {
 
 		//Loads the correct FXML file.
 		FXMLLoader loader = new FXMLLoader();
-		loader.setLocation(GUIController.class.getResource("views/GUI.fxml"));
+		loader.setLocation(GUIController.class.getClassLoader().getResource("GUI.fxml"));
 		BorderPane layout = null;
 
 		try {
@@ -55,6 +55,7 @@ public class Breakout extends Application {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
 		if (layout != null) {
 			Scene scene = new Scene(layout);
 
@@ -70,23 +71,20 @@ public class Breakout extends Application {
 				} else if (params.get("input").equals("cheat")) {
 					input = new CheatInputHandler(width, board);
 				}
-				if (input == null) {
-					input = new MouseInputHandler(width, scene);
-				}
-			} else {
+			}
+			if (input == null) {
 				input = new MouseInputHandler(width, scene);
 			}
-			if (Breakout.DEBUG) {
-				System.out.println("Using input: " + input.getClass().getSimpleName());
-			}
+
 			GUIController controller = loader.getController();
-			if (params.containsKey("name")) {
-				controller.setName(params.get("name"));
-			}
+			controller.setPlayerName(getStringFromParam(params, "name", null));
+			controller.setGetHighscores(getBoolFromParam(params, "gethighscores", true));
 			controller.setBoard(board);
 			controller.setInputHandler(input);
+			controller.setVideo(getStringFromParam(params, "cameraview", null));
 			controller.createGUI();
-			input.handle();
+
+
 			if (input instanceof MouseInputHandler || input instanceof CheatInputHandler) {
 				scene.setOnMouseClicked(
 						event -> {
@@ -95,10 +93,6 @@ public class Breakout extends Application {
 							}
 						}
 				);
-			}
-
-			if (getBoolFromParam(params, "enablecameraview", false)) {
-				controller.setVideo(getStringFromParam(params, "cameraview", null));
 			}
 
 			if (getBoolFromParam(params, "fullscreen", false)) {

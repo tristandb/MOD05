@@ -10,13 +10,12 @@ import java.util.*;
  * @since 28-10-15
  */
 public class DatabaseConnector {
-
+	public static final int LOGIN_TIMEOUT = 5;
     private static volatile DatabaseConnector instance = null;
-    private Connection connection = null;
-    private Statement statement = null;
-    private String url = "jdbc:mysql://natsirt.nl/ut_breakout";
-    private String user = "ut_breakout";
-    private String password = "XsJxN39fj6jYuBhw";
+    private static Connection connection = null;
+    private static final String url = "jdbc:mysql://91.121.112.183/ut_breakout";
+    private static final String user = "ut_breakout";
+    private static final String password = "XsJxN39fj6jYuBhw";
     private static final String NAME = "name";
     private static final String SCORE = "score";
 
@@ -42,6 +41,7 @@ public class DatabaseConnector {
     public Connection connectDatabase() {
         try {
             Class.forName("com.mysql.jdbc.Driver");
+            DriverManager.setLoginTimeout(LOGIN_TIMEOUT);
             connection = DriverManager.getConnection(url, user, password);
         } catch (ClassNotFoundException | SQLException e) {
 			if (Breakout.DEBUG) {

@@ -1,5 +1,6 @@
 package nl.utwente.mod05.breakout.input;
 
+import nl.utwente.mod05.breakout.Breakout;
 import nl.utwente.mod05.breakout.model.Board;
 
 import java.util.Random;
@@ -28,14 +29,16 @@ public class CheatInputHandler extends InputHandler {
 	 */
 	@Override
 	public synchronized void handle() {
-
+		if (Breakout.DEBUG) {
+			System.out.println("Using input: " + this.getClass().getSimpleName());
+		}
 	}
 
 	@Override
 	public synchronized int getInput() {
 		double ballX = this.board.getBall().getX() + this.board.getBall().getRadius();
 		this.position = (int) ballX
-				+ ((new Random()).nextInt((int) this.board.getPaddle().getWidth() / 2)
+				+ ((new Random()).nextInt((int) this.board.getPaddle().getWidth())
 				* (new Random()).nextInt(2) % 2 == 1 ? -1 : 1);
 		return this.position;
 	}
