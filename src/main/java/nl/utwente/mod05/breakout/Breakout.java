@@ -85,15 +85,13 @@ public class Breakout extends Application {
 			controller.createGUI();
 
 
-			if (input instanceof MouseInputHandler || input instanceof CheatInputHandler) {
-				scene.setOnMouseClicked(
-						event -> {
-							if (!board.isRunning()) {
-								controller.startGame();
-							}
+			scene.setOnMouseClicked(
+					event -> {
+						if (!board.isRunning()) {
+							controller.startGame();
 						}
-				);
-			}
+					}
+			);
 
 			if (getBoolFromParam(params, "fullscreen", false)) {
 				primaryStage.setFullScreen(true);

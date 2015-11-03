@@ -9,9 +9,8 @@ import java.nio.ByteBuffer;
 
 public class CameraInputHandler extends InputHandler {
 	public static final String DEFAULT_INPUT_NAME = "stdin";
-	public static final int INPUT_BITS = 8;
-	public static final int INPUT_MAX_WIDTH = 254;
-	private ByteBuffer buffer;
+	public static final int INPUT_BYTES = 1;
+	public static final int INPUT_MAX_WIDTH = 600;
 	private InputStream stream;
 	public CameraInputHandler(int width, String pipeName) {
 		super(width);
@@ -31,33 +30,46 @@ public class CameraInputHandler extends InputHandler {
 
 	@Override
 	public synchronized int getInput() {
+		int prev = this.position;
 		try {
-			if (this.stream.available() > 2) {
-				byte[] bytes = new byte[INPUT_BITS / 8 + 1];
-				int pos = 0;
-				if (this.stream.read(bytes, 0, INPUT_BITS / 2 + 1) == INPUT_BITS / 8 + 1) {
-					for (int i = 0; i < INPUT_BITS / 8 + 1; i++) {
-						pos = (pos << 4) + bytes[i];
-					}
-					pos &= (1 << (INPUT_BITS + 1) - 1);
-				} else {
-					pos = ERROR_STATE;
-				}
-				if (pos == (1 << (INPUT_BITS + 1) - 1)) {
-					pos = ERROR_STATE;
-				} else {
-					pos = (this.maxWidth * pos) / INPUT_MAX_WIDTH;
-				}
-
-				this.position = pos;
+			//If stream is unavailable, or not enough bytes are available, return the previous
+			// position.
+			if (this.stream == null || this.stream.available() < INPUT_BYTES) {
+				return prev;
 			}
+
+			//Read up to INPUT_BYTES into the buffer, otherwise return the previous position.
+			byte[] buffer = new byte[INPUT_BYTES];
+			if (this.stream.read(buffer) != INPUT_BYTES) {
+				return prev;
+			}
+
+			//Reconstruct the position, sum up all individual bytes to check if only zeroes were
+			// sent. If only zeroes were sent, no position was found.
+			//TODO: If no position was found, maybe return ERROR STATE?
+			int pos = 0;
+			int sum = 0;
+			for (int i = 0; i < INPUT_BYTES; i++) {
+				pos = (pos << 8) + Byte.toUnsignedInt(buffer[i]);
+				sum += Byte.toUnsignedInt(buffer[i]);
+			}
+			if (sum == 0) {
+				return prev;
+			}
+
+			//Since pos is an integer, it might be possible it overflowed the max allowed value,
+			// cut this off.
+			pos &= ((1 << (INPUT_BYTES * 8)) - 1);
+			pos = (this.maxWidth * pos) / INPUT_MAX_WIDTH;
+
+			this.position = pos;
+			return pos;
 		} catch (IOException e) {
 			if (Breakout.DEBUG) {
 				System.err.println("Can not read from input stream.");
 			}
-			this.position = InputHandler.ERROR_STATE;
+			return InputHandler.ERROR_STATE;
 		}
-		return this.position;
 	}
 
 	public synchronized void handle() {

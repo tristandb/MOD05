@@ -6,9 +6,9 @@ curdir="$(pwd)"
 
 cp ./prepare_pi.sh "$tmpdir"
 cp ./picasender/spyinterface.py "$tmpdir"
-cp ./target/AugmentedBreakout-1.0-SNAPSHOT-jar-with-dependencies.jar "$tmpdir"
+cp ./target/AugmentedBreakout-1.0-SNAPSHOT-jar-with-dependencies.jar "$tmpdir/Breakout.jar"
 cp ./run.sh "$tmpdir"
 cd "$tmpdir"
-tar -pczf "$curdir/Breakout-$filedate.tar.gz"  ./
+tar pczf "$curdir/Breakout-$filedate.tar.gz"  ./
 
 rm -r "$tmpdir"
