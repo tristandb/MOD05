@@ -1,49 +1,107 @@
+import io
+import spidev
 import time
 import picamera
-import picamera.array
-import spidev
-import sys
+import cv2
 import numpy as np
-import os
-import tempfile
-from math import ceil
-
-# Configure SpiDev
-spi = spidev.SpiDev()
-spi.open(0, 0)
-spi.max_speed_hz = 50000000
-tmpdir = tempfile.mkdtemp()
-filename = os.path.join(tmpdir, 'breakoutpipe')
-os.mkfifo(filename)
-print "Namedpipe created at: " + filename
+import os, tempfile
+from PIL import Image
 
 
-def sendPipe(location):
-    fifo = open(filename, 'w')
+tosend = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 137, 137, 176, 0, 0, 0, 0, 0, 0, 0, 137, 176]
+tosend = [176, 176, 176, 176, 176]
+# Setup pipes
+tmpdir = tempfile.mkdtemp()	
+locationpipe = os.path.join(tmpdir, 'breakoutlocationpipe')
+imagepipe = os.path.join(tmpdir, 'breakoutimagepipe')
+os.mkfifo(locationpipe)
+os.mkfifo(imagepipe)
+print "Namedpipe created at: " + imagepipe
+print "Namedpipe create at: " + locationpipe
+
+
+def sendPipe(location, filename):
+    fifo = open(filename, 'w+')
     print >> fifo, location
     fifo.close()
 
+# Setup PIL
+tumbsize = 200, 150
+stream = io.BytesIO()
+boundaries = [
+    ([2, 2, 160], [90, 90, 255])
+]
+
+# Setup SPI
+spi = spidev.SpiDev()
+spi.open(0, 0)
+spi.max_speed_hz = 50000000
 
 with picamera.PiCamera() as camera:
+    # Camera resolution
+    camera.resolution = (600, 300)
+    
+    # Make pictures until interrupted
     while True:
-        print "NR"
-        with picamera.array.PiRGBArray(camera) as output:
-            camera.resolution = (256, 144)
-            camera.capture(output, 'rgb')
-            list = output.array.ravel().tolist()
-            sendlist = []
-            print "Sending color: " + str(list[len(list) - 5]) + str(list[len(list) - 4]) + str(
-                list[len(list) - 3]) + str(list[len(list) - 2]) + str(list[len(list) - 1])
-            for x in range(0, len(list), 1):
-                sendlist.append(list[x])
-                #print "Send " + str(list[x])
-                if len(sendlist) == 4096 or x == (len(list) - 1):
-                    result = spi.xfer2(sendlist)
-                    sendlist = []
-                    for y in range(0, len(result)):
-                        if result[y] != 255 and result[y] != 0:
-                            print "Received: " + str(result[y])
-        #time.sleep(10)
-    os.remove(filename)
-    os.rmdir(tmpdir)
+ 	time.sleep(1)
+        print "Next picture"
+	# Reset stream
+        stream = io.BytesIO()
+	
+	# Capture image
+        camera.start_preview()
+        camera.capture(stream, format='jpeg')
+	
+	# Get data from stream
+        data = np.fromstring(stream.getvalue(), dtype=np.uint8)
+        image = cv2.imdecode(data, 1)
+        for (lower, upper) in boundaries:
+            # Create NumPy arrays
+            lower = np.array(lower, dtype="uint8")
+            upper = np.array(upper, dtype="uint8")
 
+            # Find colors and apply mask
+            mask = cv2.inRange(image, lower, upper)
+            output = cv2.bitwise_and(image, image, mask=mask)
+            sendlist = output[:, :, 2].tolist()
+	    sendravel = output[:,:, 2].ravel().tolist()
+	    sendravel = tosend
+		#sendlist = tosend
+            # Save images (can be commented out for more speed)
+            img = Image.fromarray(output[:, :, ::-1])
+            img.save('/var/www/imgr.jpeg')
+            imgor = Image.fromarray(image[:, :, ::-1])
+            imgor.save('/var/www/imgor.jpeg')
+            imgtumb = Image.fromarray(image[:, :, ::-1])
+            imgtumb.thumbnail(tumbsize)
+            #imgtumb.save('/var/www/imgtumb.jpeg')
+	 	
+	    # Add data to pipe
+            sendPipe(imgtumb, imagepipe)
+            # Make calculations
+            countx = 0
+            county = 0
+            matches = 0
+	    for z in range(0, len(sendravel), 1):
+	    	result = spi.xfer([sendravel[z]])
+	    	print result
+	
+            for x in range(0, len(sendlist), 1):
+                	# Calculate the location on the RPi
+		#result = spi.xfer(sendlist[x])
+		
+                for y in range(0, len(sendlist[x]),1):
+                       	if sendlist[x][y] > 0:
+                               	countx = countx + y
+                               	county = county + x
+                               	matches = matches + 1
+			#if result[y] != 0:
+			#	print result[y]
+
+            # Send location trough pipe
+	    if matches > 0:
+            	sendPipe(str(countx/matches), locationpipe)
+	    	print "location: (" + str((countx/matches)) + "," +str(county/matches) + ")"
+	    	print "matches: " + str(matches)
+	    else:
+		print "No location found"

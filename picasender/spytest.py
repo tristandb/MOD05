@@ -2,11 +2,11 @@ import spidev
 
 # Configure SpiDev
 spi = spidev.SpiDev()
-spi.open(0,0)
+spi.open(0,1)
 spi.max_speed_hz = 5000000
-list =[]
-for a in range(0, 256):
-    list.append(a)
-print spi.xfer(list)
+while True:
+	list = [104]	
+	result = spi.xfer(list)
+	if result != [0]:
+		print result
 
-print spi.xfer([166])
