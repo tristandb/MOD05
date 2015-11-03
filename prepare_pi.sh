@@ -2,7 +2,7 @@
 #Script needs to be executed with root privileges. Check if user has sudo rights.
 ROOT_UID=0
 if [ "$UID" != "$ROOT_UID" ]; then
-	echo "You need sudo rights to run this script."
+	echo "You need sudo rights to run.sh this script."
 	exit 1
 fi
 #HOME_DIR represents the user's home directory.
@@ -18,13 +18,15 @@ grep -q "^gpu_mem" /boot/config.txt && sed -i "s/^gpu_mem=(\d)+/gpu_mem=512/" /b
 
 echo "Setting up X configuration in $HOME_DIR."
 if [ -e "$HOME_DIR/.xsession" ]; then
-	mv $HOME_DIR/.xsession ~/.xsession.bak
+	mv "$HOME_DIR/.xsession" ~/.xsession.bak
 fi
-echo "STARTUP=" > $HOME_DIR/.xsession
+echo "STARTUP=" > "$HOME_DIR/.xsession"
+chown "$SUDO_USER:$SUDO_USER" "$HOME_DIR/.xsession"
 if [ -e "$HOME_DIR/.xsessionrc" ]; then
-	mv $HOME_DIR/.xsessionrc ~/.xsessionrc.bak
+	mv "$HOME_DIR/.xsessionrc" ~/.xsessionrc.bak
 fi
-echo "xrandr --output HDMI1 --mode 1000x600 & x-window-manager & java -jar ./Breakout.jar" > $HOME_DIR/.xsessionrc
+echo "x-window-manager & java -jar ./Breakout.jar" > "$HOME_DIR/.xsessionrc"
+chown "$SUDO_USER:$SUDO_USER" "$HOME_DIR/.xsessionrc"
 
 
 
@@ -34,16 +36,16 @@ grep -q "\/tmp" /etc/fstab && sed -i '/ \/tmp /s/^/#/' /etc/fstab && printf "tmp
 
 echo "Installing necessary packages"
 #install necessary packages
-#apt-get update
+apt-get update
 apt-get install -y python-dev python-numpy python-opencv python-imaging
 if [ `python -c 'import pkgutil; print(1 if pkgutil.find_loader("spidev") else 0)'` -eq "0" ]; then
-	dir=$(mkdir -d)
-	cd $dir
+	dir="$(mktemp -d)"
+	cd "$dir"
 	wget https://github.com/doceme/py-spidev/archive/master.zip
 	unzip master.zip
 	cd ./py-spidev-master
 	python ./setup.py install
-	cd $HOME_DIR
+	cd "$HOME_DIR"
 fi
 
 

@@ -83,7 +83,7 @@ public class GUIController {
 		this.board.reset(this.board.getWidth(), this.board.getHeight());
 		this.board.start();
 
-		//Animation timer, should run about 60 times a second.
+		//Animation timer, should run.sh about 60 times a second.
 		new AnimationTimer() {
 			long oldTime = System.nanoTime();
 			int callGc = 0;
@@ -201,35 +201,12 @@ public class GUIController {
 	}
 
 	public void gameOver(int score) {
-		if (this.getHighscores) {
-			Platform.runLater(
-					() -> {
-						if (name == null) {
-
-							while (getName() == null || getName().trim().isEmpty()) {
-								Dialog<ButtonType> dialog = new Dialog<>();
-								dialog.getDialogPane().setHeaderText("Insert name");
-								TextField tf = new TextField();
-								dialog.getDialogPane().setContent(tf);
-								ButtonType bt = new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE);
-								dialog.getDialogPane().getButtonTypes().add(bt);
-
-								dialog.showAndWait().ifPresent(result -> {
-									if (dialog.getDialogPane().getContent() instanceof TextField) {
-										name = ((TextField) dialog.getDialogPane()
-												.getContent()).getCharacters().toString();
-									}
-								});
-							}
-						}
-
-						DatabaseConnector dbc = DatabaseConnector.getInstance();
-						if (dbc != null) {
-							dbc.addScore(name, score);
-							this.updateScoreTable();
-						}
-					});
-
+		if (this.getHighscores && this.name != null) {
+			DatabaseConnector dbc = DatabaseConnector.getInstance();
+			if (dbc != null) {
+				dbc.addScore(name, score);
+				this.updateScoreTable();
+			}
 		}
 	}
 
